@@ -18,7 +18,7 @@ import (
 
 //const key  = `paste the contents of your JSON key file here`
 func main(){
-	var c Config
+	var c util.Config
 	c.GetConf()
 
 	fmt.Println(c)
