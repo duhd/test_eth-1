@@ -1,7 +1,7 @@
 package main
 
 import (
-    // "fmt"
+    "fmt"
     "gopkg.in/yaml.v2"
     "io/ioutil"
     "log"
