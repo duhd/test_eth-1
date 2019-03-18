@@ -24,13 +24,13 @@ func main(){
 	fmt.Println(c)
 
 	// connect to an ethereum node  hosted by infura
-	blockchain, err  := ethclient.Dial(c.server)
+	blockchain, err  := ethclient.Dial(c.Server)
 
 	if err != nil {
 		log.Fatalf("Unable to connect to network:%v\n", err)
 	}
 	// Get credentials for the account to charge for contract deployments
-	auth, err := bind.NewTransactor(strings.NewReader(c.key), c.password)
+	auth, err := bind.NewTransactor(strings.NewReader(c.Key), c.Password)
 	if err != nil {
 		log.Fatalf("Failed to create authorized transactor: %v", err)
 	}
