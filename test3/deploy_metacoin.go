@@ -15,19 +15,25 @@ import (
 			"time"
 )
 
+// const key  = `{"address":"ffbcd481c1330e180879b4d2b9b50642eea43c02","crypto":{"cipher":"aes-128-ctr","ciphertext":"351950aa30a37e4b385ae27ff2139c4151a6021333bd986602e80c2288f9e8fe","cipherparams":{"iv":"aec5c52378134e49a6037a5b77bec309"},"kdf":"scrypt","kdfparams":{"dklen":32,"n":262144,"p":1,"r":8,"salt":"8b0640866e9dbbba9f4a5da4348905b6f332a1b44a614ceadd0e9bd4ea7cdd7d"},"mac":"247c67172dbcdc48f031394ef1a25547f720b769be433a382a48028137f34002"},"id":"e52f52a5-cea4-459d-9e9b-ad8c76d7a562","version":3}`
+// const ws_server = "ws://localhost:8546"
+// const password = "123456"
+// const spawnContractAddr = "0xffe2524adee706539e682152dcd5eefd819fd7cd"
 
 func main(){
+	var c config
+	c.getConf()
+
+	fmt.Println(c)
 
 	start := time.Now()
 	fmt.Println("Start transfer cash")
-	const key  = `{"address":"eb80964e1567064ba810b45300fd2ce3193d1684","crypto":{"cipher":"aes-128-ctr","ciphertext":"b53c25d092b3eb50059b52b983f73c2fb36838ea4c69f372976dcada11fa8dff","cipherparams":{"iv":"3a5118ff590d1a1b435389e754c007e6"},"kdf":"scrypt","kdfparams":{"dklen":32,"n":262144,"p":1,"r":8,"salt":"82fe2f19e0715fbdca86cf864ea0261e6593ca34bb9b9f9cc34ac2b1f5f056ec"},"mac":"2e5746c10e257ef3c9c434333cf40f78c73587fc3832bbdd8ce08808309c3865"},"id":"71fee6ee-4c06-4eee-8739-2c00701e0726","version":3}`
 
-	spawnContractAddr := "0xffe2524adee706539e682152dcd5eefd819fd7cd"
 
 	fmt.Println("Start init token ")
 
 	// Get credentials for the account to charge for contract deployments
-	auth, err := bind.NewTransactor(strings.NewReader(key), "123456")
+	auth, err := bind.NewTransactor(strings.NewReader(c.key),c.password)
 	if err != nil {
 		log.Fatalf("Failed to create authorized transactor: %v", err)
 	}
@@ -38,7 +44,7 @@ func main(){
 
 	// connect to an ethereum node  hosted by infura
 	// client1, err  := ethclient.Dial("http://localhost:8502")
-	client, err  := ethclient.Dial("ws://localhost:8546")
+	client, err  := ethclient.Dial(c.webservice)
 	if err != nil {
 		log.Fatalf("Unable to bind to deployed instance of contract:%v\n")
 	}
