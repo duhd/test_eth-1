@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 	"test_eth/contracts/metacoin"
-	"test_eth/utils"
+	util "test_eth/utils"
 		// "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -18,8 +18,8 @@ import (
 
 //const key  = `paste the contents of your JSON key file here`
 func main(){
-	var c config
-	c.getConf()
+	var c Config
+	c.GetConf()
 
 	fmt.Println(c)
 
