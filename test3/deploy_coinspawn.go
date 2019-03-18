@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 	"test_eth/contracts/metacoin"
-	"test_eth/test3/lib"
+	util "test_eth/utils"
 		// "github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -24,19 +24,19 @@ import (
 
 
 func main(){
-	var c config
-	c.getConf()
+	var c util.Config
+	c.GetConf()
 
 	fmt.Println(c)
 
 	// connect to an ethereum node  hosted by infura
-	blockchain, err  := ethclient.Dial(c.server)
+	blockchain, err  := ethclient.Dial(c.Server)
 
 	if err != nil {
 		log.Fatalf("Unable to connect to network:%v\n", err)
 	}
 	// Get credentials for the account to charge for contract deployments
-	auth, err := bind.NewTransactor(strings.NewReader(c.key), c.password)
+	auth, err := bind.NewTransactor(strings.NewReader(c.Key), c.Password)
 	if err != nil {
 		log.Fatalf("Failed to create authorized transactor: %v", err)
 	}

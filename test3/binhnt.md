@@ -9,8 +9,8 @@ abigen -sol coincaller.sol -pkg metacoin -out coincaller.go
 
 coinspawn: 0x47562495779f98c048460514becf5e1a2d217c9f
 
-caller1: 0xa341d306c6c90d19f7be11d4d347bd4206854b5c
-caller2: 0x27af2a27850e185ef3ccab0c62fdea25ace9a8f9
+caller1: 0x495303d2faceafa41b20aaab3f6aeccf797d7528
+caller2: 0xf1a79b3123eb75a7cf1230601383f8da484a55a6
 
 
 token: 0xAE6313a252d905cdc0d8e9116fE31696CC832145
