@@ -23,7 +23,7 @@ func main(){
 
 	var c util.Config
 	c.GetConf()
-	fmt.Println(c)
+	// fmt.Println(c)
 
 	start := time.Now()
 	fmt.Println("Start transfer cash")
