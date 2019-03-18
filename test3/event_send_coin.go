@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	  "context"
 		"test_eth/contracts/metacoin"
 		"github.com/ethereum/go-ethereum/ethclient"
@@ -20,9 +21,9 @@ func main(){
 
 		var c util.Config
 		c.GetConf()
+
   	// connect to an ethereum node  hosted by infura
   	client, err  := ethclient.Dial(c.Webservice)
-		// client, err  := ethclient.Dial("http://localhost:8502")
 
   	if err != nil {
   		fmt.Println("Unable to connect to network:%v\n", err)

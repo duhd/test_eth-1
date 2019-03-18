@@ -1,6 +1,7 @@
 package main
 
 import (
+	 "os"
 	  "context"
 		"test_eth/contracts/metacoin"
 		"github.com/ethereum/go-ethereum/ethclient"
