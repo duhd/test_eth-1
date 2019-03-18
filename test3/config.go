@@ -26,3 +26,9 @@ func (c *config) getConf() *config {
     }
     return c
 }
+func main() {
+    var c config
+    c.getConf()
+
+    fmt.Println(c)
+}
