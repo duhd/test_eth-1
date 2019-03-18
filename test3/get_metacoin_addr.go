@@ -46,7 +46,7 @@ func getAddress(contractAddr string){
 
 			//Create transation
 			auth.GasPrice = big.NewInt(1)
-			auth.GasLimit = 100000000000000
+			//auth.GasLimit = 100000000000000
 
 
 			client, err  := ethclient.Dial(c.Webservice)
