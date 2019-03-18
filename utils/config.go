@@ -7,14 +7,14 @@ import (
     "log"
 )
 
-type config struct {
-    key string `yaml:"key"`
-    server string `yaml:"server"`
-    webservice string `yaml:"webservice"`
-    password string `yaml:"password"`
+type Config struct {
+    Key string `json:"key"`
+    Server string `yaml:"server"`
+    Webservice string `yaml:"webservice"`
+    Password string `yaml:"password"`
 }
 
-func (c *config) getConf() *config {
+func (c *Config) GetConf() *Config {
 
     yamlFile, err := ioutil.ReadFile("config.yaml")
     if err != nil {
@@ -27,8 +27,8 @@ func (c *config) getConf() *config {
     return c
 }
 func main() {
-    var c config
-    c.getConf()
+    var c Config
+    c.GetConf()
 
     fmt.Println(c)
 }
