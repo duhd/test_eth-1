@@ -63,7 +63,7 @@ func main(){
 	 }
 
 
-	note :=  fmt.Sprintf("Transaction: %d more: %s",i,append)
+	note :=  fmt.Sprintf("Transaction:  %s", append)
 	tx, err := instance.Transfer(auth, address, value, []byte(note))
 	if err != nil {
 			log.Fatalf(" Transaction create error: ", err)
