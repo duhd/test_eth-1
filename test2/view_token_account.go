@@ -2,7 +2,7 @@ package main
 
 import (
 	"os"
-	"log"
+	// "log"
 	"test_eth/contracts"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
