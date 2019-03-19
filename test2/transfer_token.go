@@ -1,71 +1,69 @@
 package main
 
 import (
-			"log"
-			"test_eth/contracts"
-			"github.com/ethereum/go-ethereum/ethclient"
-			"github.com/ethereum/go-ethereum/accounts/abi/bind"
-			"github.com/ethereum/go-ethereum/common"
-			// "github.com/ethereum/go-ethereum/accounts/abi/bind/backends"
-		  // "github.com/ethereum/go-ethereum/rpc"
-			"strings"
-			"fmt"
-			"math/big"
-			"time"
+	"os"
+	"log"
+	"test_eth/contracts"
+	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"github.com/ethereum/go-ethereum/common"
+	"strings"
+	"fmt"
+	"math/big"
+	"time"
 )
 
 
 func main(){
+	if len(os.Args) <7 {
+		 fmt.Println("Please use syntax: go run trensfer_token.go keyfile  websocket password account amount note")
+		 return
+	}
+	keyfile := os.Args[1]
+	websocket := os.Args[2]
+	password := os.Args[3]
+	contractAddr :=  os.Args[4]
+	recvAddr := os.Args[5]
+	amount := os.Args[6]
+	append := os.Args[7]
+
 
 	start := time.Now()
-	fmt.Println("Start transfer cash")
-	const key  = `{"address":"eb80964e1567064ba810b45300fd2ce3193d1684","crypto":{"cipher":"aes-128-ctr","ciphertext":"b53c25d092b3eb50059b52b983f73c2fb36838ea4c69f372976dcada11fa8dff","cipherparams":{"iv":"3a5118ff590d1a1b435389e754c007e6"},"kdf":"scrypt","kdfparams":{"dklen":32,"n":262144,"p":1,"r":8,"salt":"82fe2f19e0715fbdca86cf864ea0261e6593ca34bb9b9f9cc34ac2b1f5f056ec"},"mac":"2e5746c10e257ef3c9c434333cf40f78c73587fc3832bbdd8ce08808309c3865"},"id":"71fee6ee-4c06-4eee-8739-2c00701e0726","version":3}`
-	contractAddr := "0x382d559d774299a8e2bf48d54a41e54b7a3991b4"
-	//contractAddr := "0x0c5375154e912135356c8320b26337a044c10852"
-	recvAddr := "0xd95f832f5296037df962ad33da618cbf0a52e192"
-	transferToken("Thread 1",key,contractAddr,recvAddr)
+	fmt.Println("Start transfer token")
+	keyjson, err := ioutil.ReadFile(keyfile)
+
+	auth, err := bind.NewTransactor(bytes.NewReader(keyjson), password)
+	if err != nil {
+		log.Fatalf("Failed to create authorized transactor: %v", err)
+	}
+
+	//Create transation
+	auth.GasPrice = big.NewInt(1)
+	auth.GasLimit = 100000000000000
+
+	client, err  := ethclient.Dial(websocket)
+	if err != nil {
+		log.Fatalf("Unable to bind to deployed instance of contract:%v\n")
+	}
+
+	contractAddress := common.HexToAddress(contractAddr)
+	instance, err := contracts.NewVNDWallet(contractAddress, client)
+
+	if err != nil {
+		log.Fatalf("Unable to connect to network:%v\n", err)
+	}
+	address := common.HexToAddress(recvAddr)
+	value := big.NewInt(amount)
+
+	note :=  fmt.Sprintf("Transaction: %d more: %s",i,append)
+	tx, err := instance.Transfer(auth, address, value, []byte(note))
+	if err != nil {
+			log.Fatalf(threadName," Transaction ",i," create error: ", err)
+	}
+	fmt.Println(threadName," Transaction ",i," , tx =",tx.Hash().Hex())
+
 	end := time.Now()
 	elapsed := end.Sub(start)
 	fmt.Println("All times: ",elapsed)
 
 }
-func transferToken(threadName string,key string, contractAddr string, recvAddr string ){
-				fmt.Println("Start thread: ",threadName)
-
-				// Get credentials for the account to charge for contract deployments
-				auth, err := bind.NewTransactor(strings.NewReader(key), "123456")
-				if err != nil {
-					log.Fatalf("Failed to create authorized transactor: %v", err)
-				}
-
-				//Create transation
-				auth.GasPrice = big.NewInt(1)
-				auth.GasLimit = 100000000000000
-
-				// connect to an ethereum node  hosted by infura
-				// client1, err  := ethclient.Dial("http://localhost:8502")
-				client, err  := ethclient.Dial("ws://localhost:8546")
-				if err != nil {
-					log.Fatalf("Unable to bind to deployed instance of contract:%v\n")
-				}
-
-				contractAddress := common.HexToAddress(contractAddr)
-				instance, err := contracts.NewVNDWallet(contractAddress, client)
-
-				if err != nil {
-					log.Fatalf("Unable to connect to network:%v\n", err)
-				}
-				append := "Quick announcement about our new publication AI³. We are getting the best writers together to talk about the Theory, Practice, and Business of AI and machine learning. Follow it to stay up to date on the latest trends. In Part I of this series on capsule networks, I talked about the basic intuition and motivation behind the novel architecture. In this part, I will describe, what capsule is and how it works internally as well as intuition behind it. In the next part I will focus mostly on the dynamic routing algorithm The paragraph above is very dense, and it took me a while to figure out what it means, sentence by sentence. Below is my version of the above paragraph, as I understand it: Artificial neurons output a single scalar. In addition, CNNs use convolutional layers that, for each kernel, replicate that same kernel’s weights across the entire input volume and then output a 2D matrix, where each number is the output of that kernel’s convolution with a portion of the input volume. So we can look at that 2D matrix as output of replicated feature detector. Then all kernel’s 2D matrices are stacked on top of each other to produce output of a convolutional layer.Quick announcement about our new publication AI³. We are getting the best writers together to talk about the Theory, Practice, and Business of AI and machine learning. Follow it to stay up to date on the latest trends. In Part I of this series on capsule networks, I talked about the basic intuition and motivation behind the novel architecture. In this part, I will describe, what capsule is and how it works internally as well as intuition behind it. In the next part I will focus mostly on the dynamic routing algorithm The paragraph above is very dense, and it took me a while to figure out what it means, sentence by sentence. Below is my version of the above paragraph, as I understand it: Artificial neurons output a single scalar. In addition, CNNs use convolutional layers that, for each kernel, replicate that same kernel’s weights across the entire input volume and then output a 2D matrix, where each number is the output of that kernel’s convolution with a portion of the input volume. So we can look at that 2D matrix as output of replicated feature detector. Then all kernel’s 2D matrices are stacked on top of each other to produce output of a convolutional layer.Quick announcement about our new publication AI³. We are getting the best writers together to talk about the Theory, Practice, and Business of AI and machine learning. Follow it to stay up to date on the latest trends. In Part I of this series on capsule networks, I talked about the basic intuition and motivation behind the novel architecture. In this part, I will describe, what capsule is and how it works internally as well as intuition behind it. In the next part I will focus mostly on the dynamic routing algorithm The paragraph above is very dense, and it took me a while to figure out what it means, sentence by sentence. Below is my version of the above paragraph, as I understand it: Artificial neurons output a single scalar. In addition, CNNs use convolutional layers that, for each kernel, replicate that same kernel’s weights across the entire input volume and then output a 2D matrix, where each number is the output of that kernel’s convolution with a portion of the input volume. So we can look at that 2D matrix as output of replicated feature detector. Then all kernel’s 2D matrices are stacked on top of each other to produce output of a convolutional layer.Quick announcement about our new publication AI³. We are getting the best writers together to talk about the Theory, Practice, and Business of AI and machine learning. Follow it to stay up to date on the latest trends. In Part I of this series on capsule networks, I talked about the basic intuition and motivation behind the novel architecture. In this part, I will describe, what capsule is and how it works internally as well as intuition behind it. In the next part I will focus mostly on the dynamic routing algorithm The paragraph above is very dense, and it took me a while to figure out what it means, sentence by sentence. Below is my version of the above paragraph, as I understand it: Artificial neurons output a single scalar. In addition, CNNs use convolutional layers that, for each kernel, replicate that same kernel’s weights across the entire input volume and then output a 2D matrix, where each number is the output of that kernel’s convolution with a portion of the input volume. So we can look at that 2D matrix as output of replicated feature detector. Then all kernel’s 2D matrices are stacked on top of each other to produce output of a convolutional layer.Quick announcement about our new publication AI³. We are getting the best writers together to talk about the Theory, Practice, and Business of AI and machine learning. Follow it to stay up to date on the latest trends. In Part I of this series on capsule networks, I talked about the basic intuition and motivation behind the novel architecture. In this part, I will describe, what capsule is and how it works internally as well as intuition behind it. In the next part I will focus mostly on the dynamic routing algorithm The paragraph above is very dense, and it took me a while to figure out what it means, sentence by sentence. Below is my version of the above paragraph, as I understand it: Artificial neurons output a single scalar. In addition, CNNs use convolutional layers that, for each kernel, replicate that same kernel’s weights across the entire input volume and then output a 2D matrix, where each number is the output of that kernel’s convolution with a portion of the input volume. So we can look at that 2D matrix as output of replicated feature detector. Then all kernel’s 2D matrices are stacked on top of each other to produce output of a convolutional layer.Quick announcement about our new publication AI³. We are getting the best writers together to talk about the Theory, Practice, and Business of AI and machine learning. Follow it to stay up to date on the latest trends. In Part I of this series on capsule networks, I talked about the basic intuition and motivation behind the novel architecture. In this part, I will describe, what capsule is and how it works internally as well as intuition behind it. In the next part I will focus mostly on the dynamic routing algorithm The paragraph above is very dense, and it took me a while to figure out what it means, sentence by sentence. Below is my version of the above paragraph, as I understand it: Artificial neurons output a single scalar. In addition, CNNs use convolutional layers that, for each kernel, replicate that same kernel’s weights across the entire input volume and then output a 2D matrix, where each number is the output of that kernel’s convolution with a portion of the input volume. So we can look at that 2D matrix as output of replicated feature detector. Then all kernel’s 2D matrices are stacked on top of each other to produce output of a convolutional layer.Quick announcement about our new publication AI³. We are getting the best writers together to talk about the Theory, Practice, and Business of AI and machine learning. Follow it to stay up to date on the latest trends. In Part I of this series on capsule networks, I talked about the basic intuition and motivation behind the novel architecture. In this part, I will describe, what capsule is and how it works internally as well as intuition behind it. In the next part I will focus mostly on the dynamic routing algorithm The paragraph above is very dense, and it took me a while to figure out what it means, sentence by sentence. Below is my version of the above paragraph, as I understand it: Artificial neurons output a single scalar. In addition, CNNs use convolutional layers that, for each kernel, replicate that same kernel’s weights across the entire input volume and then output a 2D matrix, where each number is the output of that kernel’s convolution with a portion of the input volume. So we can look at that 2D matrix as output of replicated feature detector. Then all kernel’s 2D matrices are stacked on top of each other to produce output of a convolutional layer.Quick announcement about our new publication AI³. We are getting the best writers together to talk about the Theory, Practice, and Business of AI and machine learning. Follow it to stay up to date on the latest trends. In Part I of this series on capsule networks, I talked about the basic intuition and motivation behind the novel architecture. In this part, I will describe, what capsule is and how it works internally as well as intuition behind it. In the next part I will focus mostly on the dynamic routing algorithm The paragraph above is very dense, and it took me a while to figure out what it means, sentence by sentence. Below is my version of the above paragraph, as I understand it: Artificial neurons output a single scalar. In addition, CNNs use convolutional layers that, for each kernel, replicate that same kernel’s weights across the entire input volume and then output a 2D matrix, where each number is the output of that kernel’s convolution with a portion of the input volume. So we can look at that 2D matrix as output of replicated feature detector. Then all kernel’s 2D matrices are stacked on top of each other to produce output of a convolutional layer.Quick announcement about our new publication AI³. We are getting the best writers together to talk about the Theory, Practice, and Business of AI and machine learning. Follow it to stay up to date on the latest trends. In Part I of this series on capsule networks, I talked about the basic intuition and motivation behind the novel architecture. In this part, I will describe, what capsule is and how it works internally as well as intuition behind it. In the next part I will focus mostly on the dynamic routing algorithm The paragraph above is very dense, and it took me a while to figure out what it means, sentence by sentence. Below is my version of the above paragraph, as I understand it: Artificial neurons output a single scalar. In addition, CNNs use convolutional layers that, for each kernel, replicate that same kernel’s weights across the entire input volume and then output a 2D matrix, where each number is the output of that kernel’s convolution with a portion of the input volume. So we can look at that 2D matrix as output of replicated feature detector. Then all kernel’s 2D matrices are stacked on top of each other to produce output of a convolutional layer.Quick announcement about our new publication AI³. We are getting the best writers together to talk about the Theory, Practice, and Business of AI and machine learning. Follow it to stay up to date on the latest trends. In Part I of this series on capsule networks, I talked about the basic intuition and motivation behind the novel architecture. In this part, I will describe, what capsule is and how it works internally as well as intuition behind it. In the next part I will focus mostly on the dynamic routing algorithm The paragraph above is very dense, and it took me a while to figure out what it means, sentence by sentence. Below is my version of the above paragraph, as I understand it: Artificial neurons output a single scalar. In addition, CNNs use convolutional layers that, for each kernel, replicate that same kernel’s weights across the entire input volume and then output a 2D matrix, where each number is the output of that kernel’s convolution with a portion of the input volume. So we can look at that 2D matrix as output of replicated feature detector. Then all kernel’s 2D matrices are stacked on top of each other to produce output of a convolutional layer.Quick announcement about our new publication AI³. We are getting the best writers together to talk about the Theory, Practice, and Business of AI and machine learning. Follow it to stay up to date on the latest trends. In Part I of this series on capsule networks, I talked about the basic intuition and motivation behind the novel architecture. In this part, I will describe, what capsule is and how it works internally as well as intuition behind it. In the next part I will focus mostly on the dynamic routing algorithm The paragraph above is very dense, and it took me a while to figure out what it means, sentence by sentence. Below is my version of the above paragraph, as I understand it: Artificial neurons output a single scalar. In addition, CNNs use convolutional layers that, for each kernel, replicate that same kernel’s weights across the entire input volume and then output a 2D matrix, where each number is the output of that kernel’s convolution with a portion of the input volume. So we can look at that 2D matrix as output of replicated feature detector. Then all kernel’s 2D matrices are stacked on top of each other to produce output of a convolutional layer.Quick announcement about our new publication AI³. We are getting the best writers together to talk about the Theory, Practice, and Business of AI and machine learning. Follow it to stay up to date on the latest trends. In Part I of this series on capsule networks, I talked about the basic intuition and motivation behind the novel architecture. In this part, I will describe, what capsule is and how it works internally as well as intuition behind it. In the next part I will focus mostly on the dynamic routing algorithm The paragraph above is very dense, and it took me a while to figure out what it means, sentence by sentence. Below is my version of the above paragraph, as I understand it: Artificial neurons output a single scalar. In addition, CNNs use convolutional layers that, for each kernel, replicate that same kernel’s weights across the entire input volume and then output a 2D matrix, where each number is the output of that kernel’s convolution with a portion of the input volume. So we can look at that 2D matrix as output of replicated feature detector. Then all kernel’s 2D matrices are stacked on top of each other to produce output of a convolutional layer.Quick announcement about our new publication AI³. We are getting the best writers together to talk about the Theory, Practice, and Business of AI and machine learning. Follow it to stay up to date on the latest trends. In Part I of this series on capsule networks, I talked about the basic intuition and motivation behind the novel architecture. In this part, I will describe, what capsule is and how it works internally as well as intuition behind it. In the next part I will focus mostly on the dynamic routing algorithm The paragraph above is very dense, and it took me a while to figure out what it means, sentence by sentence. Below is my version of the above paragraph, as I understand it: Artificial neurons output a single scalar. In addition, CNNs use convolutional layers that, for each kernel, replicate that same kernel’s weights across the entire input volume and then output a 2D matrix, where each number is the output of that kernel’s convolution with a portion of the input volume. So we can look at that 2D matrix as output of replicated feature detector. Then all kernel’s 2D matrices are stacked on top of each other to produce output of a convolutional layer."
-				address := common.HexToAddress(recvAddr)
-				value := big.NewInt(1)
-
-				for i:=0 ; i< 100000; i++ {
-					note :=  fmt.Sprintf(",%s, Transaction: %d more: %s",threadName,i,append)
-					tx, err := instance.Transfer(auth, address, value, []byte(note))
-					if err != nil {
-							log.Fatalf(threadName," Transaction ",i," create error: ", err)
-					}
-					fmt.Println(threadName," Transaction ",i," , tx =",tx.Hash().Hex())
-				}
-
-	}
