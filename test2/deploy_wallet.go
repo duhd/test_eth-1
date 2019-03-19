@@ -1,7 +1,7 @@
 package main
 
 import (
-	bytes"
+	"bytes"
 	"log"
 	"test_eth/contracts"
 	"github.com/ethereum/go-ethereum/common"
