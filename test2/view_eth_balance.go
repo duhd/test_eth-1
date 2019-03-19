@@ -13,7 +13,7 @@ import (
 
 func main(){
 	if len(os.Args) <2 {
-		 fmt.Println("Please use syntax: go run deploy_metacoin.go  webserver  account")
+		 fmt.Println("Please use syntax: go run view_eth_balance.go  webserver  account")
 		 return
 	}
 	webserver := os.Args[1]
