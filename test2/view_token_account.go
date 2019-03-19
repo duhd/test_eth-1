@@ -2,7 +2,7 @@ package main
 
 import (
 	"os"
-	// "log"
+	"log"
 	"test_eth/contracts"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
@@ -36,7 +36,7 @@ func main(){
 	address := common.HexToAddress(accountaddr)
 	bal, err := instance.BalanceOf(&bind.CallOpts{}, address)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("Get balanceof: ", err)
 	}
 
 	fbal := new(big.Float)
