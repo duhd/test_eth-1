@@ -7,7 +7,9 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
-	"strings"
+	// "strings"
+	"bytes"
+	"io/ioutil"
 	"fmt"
 	"math/big"
 	"time"
@@ -53,14 +55,20 @@ func main(){
 		log.Fatalf("Unable to connect to network:%v\n", err)
 	}
 	address := common.HexToAddress(recvAddr)
-	value := big.NewInt(amount)
+	value := new(big.Int)
+	value, ok := value.SetString(amount, 10)
+	 if !ok {
+			 fmt.Println("SetString: error")
+			 return
+	 }
+
 
 	note :=  fmt.Sprintf("Transaction: %d more: %s",i,append)
 	tx, err := instance.Transfer(auth, address, value, []byte(note))
 	if err != nil {
-			log.Fatalf(threadName," Transaction ",i," create error: ", err)
+			log.Fatalf(" Transaction create error: ", err)
 	}
-	fmt.Println(threadName," Transaction ",i," , tx =",tx.Hash().Hex())
+	fmt.Println(" Transaction =",tx.Hash().Hex())
 
 	end := time.Now()
 	elapsed := end.Sub(start)
