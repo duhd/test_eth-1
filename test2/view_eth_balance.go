@@ -1,41 +1,42 @@
 package main
 
 import (
+	"os"
 	"context"
 	"log"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/common"
-	// "github.com/ethereum/go-ethereum/core/types"
-	// "github.com/ethereum/go-ethereum/crypto"
-	// "crypto/ecdsa"
 	"fmt"
 	"math"
 	"math/big"
-
 )
 
 func main(){
-		// connect to an ethereum node  hosted by infura
-		client, err  := ethclient.Dial("http://localhost:8502")
+	if len(os.Args) <2 {
+		 fmt.Println("Please use syntax: go run deploy_metacoin.go  webserver  account")
+		 return
+	}
+	webserver := os.Args[1]
+	accountaddr := os.Args[2]
 
-		if err != nil {
-			log.Fatalf("Unable to connect to network:%v\n", err)
-		}
+	client, err  := ethclient.Dial(webserver)
 
-	//	account := common.HexToAddress("0xeb80964e1567064ba810b45300fd2ce3193d1684")
-		account := common.HexToAddress("0xd95f832f5296037df962ad33da618cbf0a52e192")
+	if err != nil {
+		log.Fatalf("Unable to connect to network:%v\n", err)
+	}
 
-		balance, err := client.BalanceAt(context.Background(), account, nil)
-		if err != nil {
-			log.Fatal(err)
-		}
+//	account := common.HexToAddress("0xeb80964e1567064ba810b45300fd2ce3193d1684")
+	account := common.HexToAddress(accountaddr)
 
-		fmt.Println("Balance: ",balance) // 25893180161173005034
+	balance, err := client.BalanceAt(context.Background(), account, nil)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-		// pendingBalance, err := client.PendingBalanceAt(context.Background(), account)
-		// fmt.Println("pendingBalance:", pendingBalance/1000000000000000000) // 25729324269165216042
-		fbalance := new(big.Float)
-		fbalance.SetString(balance.String())
-		ethValue := new(big.Float).Quo(fbalance, big.NewFloat(math.Pow10(18)))
-		fmt.Println("ethValue:", ethValue) // 25.729324269165216041
+	fmt.Println("Balance: ",balance) // 25893180161173005034
+
+	fbalance := new(big.Float)
+	fbalance.SetString(balance.String())
+	ethValue := new(big.Float).Quo(fbalance, big.NewFloat(math.Pow10(18)))
+	fmt.Println("ethValue:", ethValue) // 25.729324269165216041
 }

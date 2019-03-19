@@ -10,15 +10,8 @@ import (
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"math/big"
 	"io/ioutil"
-	// "strings"
 	"fmt"
 )
-// const key  = `{"address":"ffbcd481c1330e180879b4d2b9b50642eea43c02","crypto":{"cipher":"aes-128-ctr","ciphertext":"351950aa30a37e4b385ae27ff2139c4151a6021333bd986602e80c2288f9e8fe","cipherparams":{"iv":"aec5c52378134e49a6037a5b77bec309"},"kdf":"scrypt","kdfparams":{"dklen":32,"n":262144,"p":1,"r":8,"salt":"8b0640866e9dbbba9f4a5da4348905b6f332a1b44a614ceadd0e9bd4ea7cdd7d"},"mac":"247c67172dbcdc48f031394ef1a25547f720b769be433a382a48028137f34002"},"id":"e52f52a5-cea4-459d-9e9b-ad8c76d7a562","version":3}`
-// const webserver = "http://172.101.0.17:8501"
-// const password = "123456"
-// const masterkey1 = "0xbea868edea1c167aab5a0eef99496e2a690f3fae"
-// const masterkey1 = "0x0e18db9aeea79d71b4c91c8375f1ef7fd0aaa594"
-
 func main(){
 	if len(os.Args) <5 {
 		 fmt.Println("Please use syntax: go run deploy_wallet.go  keyfile webserver password masterkey1 masterkey2")
