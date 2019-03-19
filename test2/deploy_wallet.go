@@ -9,6 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"math/big"
+	"io/ioutil"
 	// "strings"
 	"fmt"
 )
@@ -37,7 +38,7 @@ func main(){
 	}
 
 	// Get credentials for the account to charge for contract deployments
-	keyjson, err := ioutil.ReadFile(file)
+	keyjson, err := ioutil.ReadFile(keyfile)
 
 
 	auth, err := bind.NewTransactor(bytes.NewReader(keyjson), password)
