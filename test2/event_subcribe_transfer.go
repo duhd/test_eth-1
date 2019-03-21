@@ -1,6 +1,8 @@
 package main
 
 import (
+		"os"
+		"strings"
 	  "context"
 		"test_eth/contracts"
 		"github.com/ethereum/go-ethereum/ethclient"
@@ -9,40 +11,52 @@ import (
 		"time"
 		"github.com/ethereum/go-ethereum/common"
 )
-
-//const key  = `paste the contents of your JSON key file here`
-// const key  = `{"address":"d95f832f5296037df962ad33da618cbf0a52e192","crypto":{"cipher":"aes-128-ctr","ciphertext":"f999d122f6edf0c3664adb25a0cb5cd91405592f36518c42684ab7db9b565d4d","cipherparams":{"iv":"ef2f1eb65573db114d5c9e6f2ac5edd2"},"kdf":"scrypt","kdfparams":{"dklen":32,"n":262144,"p":1,"r":8,"salt":"f6b2cddd480c5d496f1e786c1e3705dd6362b65e96201749eb5f7bd08232bb46"},"mac":"e7111e5645875bdc1f8a21f6a33aa318c34a0df6f49c5007c427c05987dfbd85"},"id":"9cae0855-92f6-4e35-9ca1-4544a6d66b52","version":3}`
-const key  = `{"address":"eb80964e1567064ba810b45300fd2ce3193d1684","crypto":{"cipher":"aes-128-ctr","ciphertext":"b53c25d092b3eb50059b52b983f73c2fb36838ea4c69f372976dcada11fa8dff","cipherparams":{"iv":"3a5118ff590d1a1b435389e754c007e6"},"kdf":"scrypt","kdfparams":{"dklen":32,"n":262144,"p":1,"r":8,"salt":"82fe2f19e0715fbdca86cf864ea0261e6593ca34bb9b9f9cc34ac2b1f5f056ec"},"mac":"2e5746c10e257ef3c9c434333cf40f78c73587fc3832bbdd8ce08808309c3865"},"id":"71fee6ee-4c06-4eee-8739-2c00701e0726","version":3}`
-
+func str2addr(str string) []common.Address {
+	 list := strings.Split(str,",")
+	 ret :=  make([]common.Address,0)
+	 for _, element := range list {
+		 fmt.Println("Addr: ",element)
+		  addr := common.HexToAddress(element)
+      ret = append(ret,addr)
+	 }
+	 return ret
+}
 func main(){
-    	// connect to an ethereum node  hosted by infura
-    	client, err  := ethclient.Dial("ws://localhost:8546")
-			// client, err  := ethclient.Dial("http://localhost:8502")
+	if len(os.Args) <5 {
+		 fmt.Println("Please use syntax: go run event_subcribe_transfer.go  webserver contract_addr froms to")
+		 return
+	}
+	webserver := os.Args[1]
+	contractAddr := os.Args[2]
+	fromAddrs := os.Args[3]
+	toAddrs := os.Args[4]
 
-    	if err != nil {
-    		fmt.Println("Unable to connect to network:%v\n", err)
-    	}
+	client, err  := ethclient.Dial(webserver)
+	if err != nil {
+		fmt.Println("Unable to connect to network:%v\n", err)
+	}
 
 
-			contractAddress := common.HexToAddress("0x382d559d774299a8e2bf48d54a41e54b7a3991b4")
-			instance, err := contracts.NewVNDWallet(contractAddress, client)
-			if err != nil {
-				  fmt.Println("Unable to bind to deployed instance of contract")
-			}
-			fmt.Println("Start listening")
+	contractAddress := common.HexToAddress(contractAddr)
+	instance, err := contracts.NewVNDWallet(contractAddress, client)
+	if err != nil {
+		  fmt.Println("Unable to bind to deployed instance of contract")
+	}
+	fmt.Println("Start listening")
 
-			eventCh := make(chan *contracts.VNDWalletTransfer,10)
-			from :=  []common.Address{common.HexToAddress("0xeb80964e1567064ba810b45300fd2ce3193d1684"),common.HexToAddress("0xd95f832f5296037df962ad33da618cbf0a52e192")}
-			to :=   []common.Address{common.HexToAddress("0x7303040c37df72cc4410511d6ccb51e7ab7a42d5"),common.HexToAddress("0xd95f832f5296037df962ad33da618cbf0a52e192")}
+	eventCh := make(chan *contracts.VNDWalletTransfer,10)
 
-			sub,err := instance.WatchTransfer(&bind.WatchOpts{Start: nil,  Context: context.Background()},eventCh, from, to )
-			defer sub.Unsubscribe()
-			//
-			// var event *contracts.CounterCounterIncreasedEvt
-	     for {
-	         select {
-								 case event := <-eventCh:
-									  fmt.Println("time:",time.Now(),", From: ", event.From.Hex(),", To: ", event.To.Hex(), ", Value: ", event.Value,",Data: ",string(event.Data) )
-			        }
-	     }
+	from :=  str2addr(fromAddrs)
+	to :=   str2addr(toAddrs)
+
+	sub,err := instance.WatchTransfer(&bind.WatchOpts{Start: nil,  Context: context.Background()},eventCh, from, to )
+	defer sub.Unsubscribe()
+	//
+	// var event *contracts.CounterCounterIncreasedEvt
+   for {
+       select {
+						 case event := <-eventCh:
+							  fmt.Println("time:",time.Now(),", From: ", event.From.Hex(),", To: ", event.To.Hex(), ", Value: ", event.Value,",Data: ",string(event.Data) )
+	        }
+   }
 }

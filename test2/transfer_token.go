@@ -18,7 +18,7 @@ import (
 
 func main(){
 	if len(os.Args) <7 {
-		 fmt.Println("Please use syntax: go run trensfer_token.go keyfile  websocket password account amount note")
+		 fmt.Println("Please use syntax: go run transfer_token.go keyfile  websocket password contractAddr recvAddr amount note")
 		 return
 	}
 	keyfile := os.Args[1]
@@ -40,8 +40,8 @@ func main(){
 	}
 
 	//Create transation
-	auth.GasPrice = big.NewInt(1)
-	auth.GasLimit = 100000000000000
+	//auth.GasPrice = big.NewInt(1)
+	//auth.GasLimit = 100000000000000
 
 	client, err  := ethclient.Dial(websocket)
 	if err != nil {
@@ -61,7 +61,6 @@ func main(){
 			 fmt.Println("SetString: error")
 			 return
 	 }
-
 
 	note :=  fmt.Sprintf("Transaction:  %s", append)
 	tx, err := instance.Transfer(auth, address, value, []byte(note))

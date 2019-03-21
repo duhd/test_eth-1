@@ -17,15 +17,13 @@ var logger = log.New()
 func main(){
   	// connect to an ethereum node  hosted by infura
 		if len(os.Args) <5 {
-			 fmt.Println("Please use syntax: go run deploy_metacoin.go  webserver  password contract_addr from to")
+			 fmt.Println("Please use syntax: go run event_read.go  webserver  contract_addr from to")
 			 return
 		}
 		webserver := os.Args[1]
-		password := os.Args[2]
-
-		contractAddr := os.Args[3]
-		fromAddr := os.Args[4]
-		toAddr := os.Args[5]
+		contractAddr := os.Args[2]
+		fromAddr := os.Args[3]
+		toAddr := os.Args[4]
 
   	client, err  := ethclient.Dial(webserver)
 

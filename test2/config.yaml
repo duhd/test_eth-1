@@ -1,0 +1,12 @@
+keystore: ./keystore
+server: http://103.126.156.17:8501
+webservice: ws://103.126.156.17:8541
+password: "123456"
+redis_host: localhost:6379
+redis_password: ""
+redis_db: 0
+contract_address: 0x495303d2FaCEaFa41B20aAab3f6AeCcf797D7528
+keyfile: UTC--2019-03-18T03-35-27.638151000Z--ffbcd481c1330e180879b4d2b9b50642eea43c02
+masterkey1: 0xbea868edea1c167aab5a0eef99496e2a690f3fae
+masterkey2: 0x0e18db9aeea79d71b4c91c8375f1ef7fd0aaa594
+initialToken: 100000000000000
