@@ -9,13 +9,6 @@ import (
   "path/filepath"
 )
 
-type Transaction struct {
-        Id                string  `json:"Id"`
-        RequestTime       int64   `json:"RequestTime"`
-        TxReceiveTime     int64   `json:"TxReceiveTime"`
-        TxConfirmedTime    []int64 `json:"TxConfiredTime"`
-   }
-
 type Config struct {
 		Keys  struct {
 			  Keystore string `yaml:"keystore"`

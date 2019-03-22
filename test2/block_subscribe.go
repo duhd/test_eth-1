@@ -2,11 +2,14 @@ package main
 
 import (
 	"os"
+	"strings"
 	"context"
 	"fmt"
 	"log"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
+  "test_eth/test2/utils"
+	"github.com/go-redis/redis"
 )
 
 func main() {
@@ -15,6 +18,17 @@ func main() {
 		 return
 	}
 	webserver := os.Args[1]
+
+	config_file := "config.yaml"
+	cfg := utils.LoadConfig(config_file)
+
+	//Creat redis connection
+	utils.Redis_client = redis.NewClient(&redis.Options{
+		Addr:     cfg.Redis.Host,
+		Password: cfg.Redis.Password, // no password set
+		DB:       cfg.Redis.Db,  // use default DB
+	})
+
 
 	client, err := ethclient.Dial(webserver)
 	if err != nil {
@@ -42,6 +56,8 @@ func main() {
 			}
 			for _, transaction := range block.Transactions(){
 				   fmt.Println("Transaction: ",transaction.Hash().Hex())
+					 key := strings.TrimPrefix(transaction.Hash().Hex(),"0x")
+					 utils.LogEnd(key)
 			}
 		}
 	}

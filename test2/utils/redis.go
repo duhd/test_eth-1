@@ -11,6 +11,13 @@ import (
   "github.com/go-redis/redis"
 )
 
+type Transaction struct {
+        Id                string  `json:"Id"`
+        RequestTime       int64   `json:"RequestTime"`
+        TxReceiveTime     int64   `json:"TxReceiveTime"`
+        TxConfirmedTime    []int64 `json:"TxConfiredTime"`
+   }
+
 var Redis_client *redis.Client
 
 
@@ -56,4 +63,26 @@ func LogStart(key string,requesttime int64){
 	if err != nil {
 		panic(err)
 	}
+}
+
+func LogEnd(key string){
+      val, err2 := Redis_client.Get("transaction:" + key).Result()
+      if err2 != nil {
+          fmt.Println("Cannot find transaction: ", key)
+          return
+      }
+      data := &Transaction{}
+      err := json.Unmarshal([]byte(val), data)
+      if err != nil {
+          fmt.Println("Cannot parse data ", err)
+          return
+      }
+      data.TxConfirmedTime = append(data.TxConfirmedTime, time.Now().UnixNano())
+      value, err := json.Marshal(data)
+
+      err = Redis_client.Set("transaction:" + key,string(value), 0).Err()
+    	if err != nil {
+    	     fmt.Println("Cannot set data ", err)
+    	}
+      fmt.Println("Finish write transaction: ", key)
 }

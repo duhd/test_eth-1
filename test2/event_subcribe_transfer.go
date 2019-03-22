@@ -61,23 +61,3 @@ func main(){
    }
 
 }
-
-func logEnd(key string){
-  val, err2 := redis_client.Get(key).Result()
-  if err2 != nil {
-      return
-  }
-  data := &Transaction{}
-  err := json.Unmarshal([]byte(val), data)
-  if err != nil {
-      fmt.Println(err)
-      return
-  }
-  data.End = time.Now().UnixNano()
-  value, err := json.Marshal(data)
-
-  err = redis_client.Set(key,value, 0).Err()
-	if err != nil {
-		panic(err)
-	}
-}
