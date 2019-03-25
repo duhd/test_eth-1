@@ -3,13 +3,13 @@ keys:
   password: "123456"
 networks:
 - name: host1
-  http: 127.0.0.1:8501
-  websocket: 127.0.0.1:8541
-  local: 127.0.0.1
+  http: 103.126.156.17:8501
+  websocket: 103.126.156.17:8541
+  local: 172.101.0.17
 - name: host2
-  http: 127.0.0.1:8502
-  websocket: 127.0.0.1:8542
-  local: 127.0.0.1
+  http: 103.126.156.18:8502
+  websocket: 103.126.156.18:8542
+  local: 172.101.0.18
 redis:
   host: localhost:6379
   password: ""

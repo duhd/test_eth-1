@@ -34,8 +34,10 @@ type Config struct {
 		} `yaml:"contract"`
 }
 
+var cfg *Config
+
 func LoadConfig(file string) *Config {
-     cfg := &Config{}
+     cfg = &Config{}
 
      yamlFile, err := ioutil.ReadFile(file)
      if err != nil {
@@ -46,6 +48,7 @@ func LoadConfig(file string) *Config {
      if err != nil {
          fmt.Println("Unmarshal: %v", err)
      }
+
      return cfg
 }
 

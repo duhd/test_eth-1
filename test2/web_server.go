@@ -1,31 +1,24 @@
 package main
 
 import (
+        // "strconv"
+        // "math/rand"
+        // "crypto/sha1"
+        // "encoding/base64"
+        // "hash"
         "os"
         "strings"
        "github.com/gin-gonic/gin"
        "github.com/go-redis/redis"
         "net/http"
         "encoding/json"
-        // "strconv"
-        // "math/rand"
         "fmt"
-  			"time"
-        // "crypto/sha1"
-        // "encoding/base64"
-        // "hash"
-        "test_eth/contracts"
-      	"math/big"
-        "github.com/ethereum/go-ethereum/ethclient"
-        "github.com/ethereum/go-ethereum/accounts/abi/bind"
-        "github.com/ethereum/go-ethereum/common"
         "test_eth/test2/utils"
 )
 
 var cfg *utils.Config
 
-// var sha hash.Hash
-var clients []*ethclient.Client
+var clients []*utils.EthClient
 var current int = 0
 
 func init() {
@@ -44,19 +37,23 @@ func init() {
      DB:       cfg.Redis.Db,  // use default DB
    })
 
+   utils.DeleteData("transaction*")
+
    // sha = sha1.New()
    utils.LoadKeyStores(cfg.Keys.Keystore)
 
 
     //Load all wallets in hosts
-   for _,host := range cfg.Networks {
-         fmt.Println("Connect to host: ", host.Http)
-         client, err  := ethclient.Dial("http://" + host.Http)
-         if err != nil {
-            fmt.Println("Unable to connect to network:%v\n", err)
-         }
-        clients = append(clients,client)
-   }
+    max_connection := 100
+    for i:=0 ; i<max_connection; i++ {
+         for _,host := range cfg.Networks {
+              ethclient, err := utils.NewEthClient(host.Http)
+              if err != nil {
+                continue
+              }
+              clients = append(clients,ethclient)
+            }
+     }
 }
 
 func main() {
@@ -101,7 +98,6 @@ func processCall(c *gin.Context){
 
 // call transfer token
 func transfer(c *gin.Context){
-    requestTime := time.Now().UnixNano()
 
     from := c.Param("p1")
     to := c.Param("p2")
@@ -120,82 +116,33 @@ func transfer(c *gin.Context){
     to = strings.TrimPrefix(to,"0x")
 
     fmt.Println("Transfer: ", current," from ",from," to ",to, " amount: ",amount, " note:",append)
-    keyjson, err := utils.Redis_client.Get("account:"+from).Result()
+    client := clients[current]
+    result, err := client.TransferToken(from,to,amount,append)
+    current = current + 1
+    current = current % len(clients)
     if err != nil {
         c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "error": err})
         return
     }
-
-    auth, err := bind.NewTransactor(strings.NewReader(keyjson),cfg.Keys.Password)
-  	if err != nil {
-  		fmt.Println("Failed to create authorized transactor: %v", err)
-  	}
-
-    address := common.HexToAddress(to)
-  	value := new(big.Int)
-  	value, ok := value.SetString(amount, 10)
-  	 if !ok {
-  			 fmt.Println("SetString: error")
-         c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "error": "Please add amount "})
-  			 return
-  	 }
-
-  	note :=  fmt.Sprintf("Transaction:  %s", append)
-
-    client := clients[current]
-    fmt.Println("Add contract: ", cfg.Contract.Address)
-    wallet, err1 := contracts.NewVNDWallet(common.HexToAddress(cfg.Contract.Address), client)
-    if err1 != nil {
-       fmt.Println("Unable to bind to deployed instance of contract:%v\n")
-   }
-
-  	tx, err := wallet.Transfer(auth, address, value, []byte(note))
-  	if err != nil {
-  			fmt.Println(" Transaction create error: ", err)
-  	}
-  	fmt.Println(" Transaction =",tx.Hash().Hex())
-
-
-    // seed := rand.Intn(100)
-    // sha.Write([]byte(strconv.Itoa(seed)))
-    // key := "Transfer:" + base64.URLEncoding.EncodeToString(sha.Sum(nil))
-    key := strings.TrimPrefix(tx.Hash().Hex(),"0x")
-    utils.LogStart(key,requestTime)
-
-
-    current = current + 1
-    current = current % len(clients)
-    c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "transaction hash": tx.Hash().Hex()})
+    c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "transaction hash": result})
 }
 // call transfer token
 func balance(c *gin.Context){
     account := c.Param("p1")
     account = strings.TrimPrefix(account,"0x")
 
-
-    address := common.HexToAddress("0x" + account)
-
     client := clients[current]
-    fmt.Println("Add contract: ", cfg.Contract.Address)
-    wallet, err1 := contracts.NewVNDWallet(common.HexToAddress(cfg.Contract.Address), client)
-    if err1 != nil {
-       fmt.Println("Unable to bind to deployed instance of contract:%v\n")
-   }
+    bal, err := client.BalaneOf(account)
 
-  	bal, err := wallet.BalanceOf(&bind.CallOpts{}, address)
-
-  	if err != nil {
-  		fmt.Println("Get balanceof: ", err)
-  	}
-
-  	fbal := new(big.Float)
-
-  	fbal.SetString(bal.String())
-  	fmt.Printf("balance: %f", bal) // "balance: 74605500.647409"
+    if err != nil {
+        c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "error ": err})
+        return
+    }
     c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "balance": bal})
 }
 // call transfer token
 func report(c *gin.Context){
+    fmt.Println("Start report")
     keys, err  := utils.Redis_client.Keys("transaction:*").Result()
     if err != nil {
       // handle error
@@ -207,6 +154,7 @@ func report(c *gin.Context){
       fmt.Println(" Cannot get values of  keys: ", keys)
     }
 
+    fmt.Println("Elements: ", len(keys))
     diff_arr := []int64{}
     for _, element := range vals {
         data := &utils.Transaction{}
@@ -224,22 +172,30 @@ func report(c *gin.Context){
                    max = value
                 }
             }
-        }else {
-            max = time.Now().UnixNano()
+
+        }
+        // else {
+        //     max = time.Now().UnixNano()
+        // }
+        if max >0 {
+            diff := max  - data.TxReceiveTime
+            diff_arr = append(diff_arr,diff)
         }
 
-        diff := max  - data.TxReceiveTime
-        diff_arr = append(diff_arr,diff)
+
     }
     var total int64 = 0
   	for _, value:= range diff_arr {
   		total += value
   	}
     len := int64(len(diff_arr))
-  	avg := total/len
+    var avg int64 = 0
+    if len >0 {
+      	avg = total/(len *1000)
+    }
+
     c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "Total": len, "Avg": avg})
 }
-
 func accounts(c *gin.Context){
     keys, err  := utils.Redis_client.Keys("account*").Result()
     if err != nil {

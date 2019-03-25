@@ -20,7 +20,15 @@ type Transaction struct {
 
 var Redis_client *redis.Client
 
-
+func DeleteData(pattern string){
+  keys, err  := Redis_client.Keys(pattern).Result()
+  if err != nil {
+    // handle error
+    fmt.Println(" Cannot get keys ")
+  }
+  res := Redis_client.Del(keys...)
+  fmt.Println("Redis delete: ", res)
+}
 func LoadKeyStores(root string){
     var files []string
     err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
