@@ -96,58 +96,59 @@ func (c *EthClient) UpdateReceipt(header *types.Header ){
            c.LogEnd(key)
       }
 }
-func (c *EthClient) TransferTokenRaw(from string,to string,amount string,append string) (string,error) {
-
-
-      requestTime := time.Now().UnixNano()
-
-      keyjson, err := Redis_client.Get("account:"+from).Result()
-      if err != nil {
-          return "", err
-      }
-
-      auth, err := bind.NewTransactor(strings.NewReader(keyjson),cfg.Keys.Password)
-      if err != nil {
-            fmt.Println("Failed to create authorized transactor: %v", err)
-            return "", err
-      }
-
-      address := common.HexToAddress(to)
-      value := new(big.Int)
-      value, ok := value.SetString(amount, 10)
-      if !ok {
-           fmt.Println("SetString: error")
-           return "", errors.New("convert amount error")
-      }
-
-      note :=  fmt.Sprintf("Transaction:  %s", append)
-
-      fmt.Println("Add contract: ", cfg.Contract.Address)
-
-
-      c.mux.Lock()
-      defer 	c.mux.Unlock()
-      wallet, err1 := contracts.NewVNDWallet(common.HexToAddress(cfg.Contract.Address), c.Client)
-      if err1 != nil {
-         fmt.Println("Unable to bind to deployed instance of contract:%v\n")
-         return "",err1
-     }
-
-      tx, err := wallet.Transfer(auth, address, value, []byte(note))
-      if err != nil {
-          fmt.Println(" Transaction create error: ", err)
-          return "",err
-      }
-      fmt.Println(" Transaction =",tx.Hash().Hex())
-      // seed := rand.Intn(100)
-      // sha.Write([]byte(strconv.Itoa(seed)))
-      // key := "Transfer:" + base64.URLEncoding.EncodeToString(sha.Sum(nil))
-      key := strings.TrimPrefix(tx.Hash().Hex(),"0x")
-      c.LogStart(key,requestTime)
-
-      return key, nil
-}
-
+//
+// func (c *EthClient) TransferTokenRaw(from string,to string,amount string,append string) (string,error) {
+//
+//
+//       requestTime := time.Now().UnixNano()
+//
+//       keyjson, err := Redis_client.Get("account:"+from).Result()
+//       if err != nil {
+//           return "", err
+//       }
+//
+//       auth, err := bind.NewTransactor(strings.NewReader(keyjson),cfg.Keys.Password)
+//       if err != nil {
+//             fmt.Println("Failed to create authorized transactor: %v", err)
+//             return "", err
+//       }
+//
+//       address := common.HexToAddress(to)
+//       value := new(big.Int)
+//       value, ok := value.SetString(amount, 10)
+//       if !ok {
+//            fmt.Println("SetString: error")
+//            return "", errors.New("convert amount error")
+//       }
+//
+//       note :=  fmt.Sprintf("Transaction:  %s", append)
+//
+//       fmt.Println("Add contract: ", cfg.Contract.Address)
+//
+//
+//       c.mux.Lock()
+//       defer 	c.mux.Unlock()
+//       wallet, err1 := contracts.NewVNDWallet(common.HexToAddress(cfg.Contract.Address), c.Client)
+//       if err1 != nil {
+//          fmt.Println("Unable to bind to deployed instance of contract:%v\n")
+//          return "",err1
+//      }
+//
+//       tx, err := wallet.Transfer(auth, address, value, []byte(note))
+//       if err != nil {
+//           fmt.Println(" Transaction create error: ", err)
+//           return "",err
+//       }
+//       fmt.Println(" Transaction =",tx.Hash().Hex())
+//       // seed := rand.Intn(100)
+//       // sha.Write([]byte(strconv.Itoa(seed)))
+//       // key := "Transfer:" + base64.URLEncoding.EncodeToString(sha.Sum(nil))
+//       key := strings.TrimPrefix(tx.Hash().Hex(),"0x")
+//       c.LogStart(key,requestTime)
+//
+//       return key, nil
+// }
+//
 
 
 func (c *EthClient) TransferToken(from string,to string,amount string,append string) (string,error) {
@@ -177,7 +178,7 @@ func (c *EthClient) TransferToken(from string,to string,amount string,append str
 
       note :=  fmt.Sprintf("Transaction:  %s", append)
 
-      fmt.Println("Add contract: ", cfg.Contract.Address)
+    //  fmt.Println("Add contract: ", cfg.Contract.Address)
       contract_address := common.HexToAddress(cfg.Contract.Address)
       backend := c.Client
 
