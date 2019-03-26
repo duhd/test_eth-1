@@ -10,6 +10,8 @@ import (
   // "time"
   "github.com/go-redis/redis"
   // "strconv"
+  "github.com/ethereum/go-ethereum/crypto"
+  "github.com/ethereum/go-ethereum/accounts/keystore"
 )
 
 
@@ -47,6 +49,20 @@ func LoadKeyStores(root string){
               err = Redis_client.Set(account,string(keyjson), 0).Err()
               if err != nil {
                 panic(err)
+              }
+
+              accountKey, err := keystore.DecryptKey( []byte(keyjson), cfg.Keys.Password)
+              if err != nil {
+                  fmt.Println("Cannot decrypt key file: ", err)
+                  return
+              }
+              privateKey := accountKey.PrivateKey
+
+              private := "private:" + list[2]
+              //Set key in redis
+              err = Redis_client.Set(private,string(crypto.FromECDSA(privateKey)), 0).Err()
+              if err != nil {
+                 panic(err)
               }
          }
     }
