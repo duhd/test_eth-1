@@ -2,7 +2,7 @@ package main
 
 import (
 	"log"
-	"eth/contracts"
+	"test_eth/contracts"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	// "github.com/ethereum/go-ethereum/accounts/abi/bind/backends"
