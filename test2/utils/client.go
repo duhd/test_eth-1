@@ -263,6 +263,9 @@ func (c *EthClient) TransferToken(from string,to string,amount string,append str
     	if err != nil {
     		return "", err
     	}
+
+      fmt.Println("Transfer: ", nonce," from ",from," to ",to, " amount: ",amount, " note:",append)
+
     	if err := backend.SendTransaction(opts.Context, signedTx); err != nil {
     		return "", err
     	}

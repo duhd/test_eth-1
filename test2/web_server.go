@@ -115,7 +115,7 @@ func transfer(c *gin.Context){
     from = strings.TrimPrefix(from,"0x")
     to = strings.TrimPrefix(to,"0x")
 
-    fmt.Println("Transfer: ", current," from ",from," to ",to, " amount: ",amount, " note:",append)
+    //fmt.Println("Transfer: ", current," from ",from," to ",to, " amount: ",amount, " note:",append)
     client := clients[current]
 
     // go func() {
