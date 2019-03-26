@@ -128,6 +128,7 @@ func transfer(c *gin.Context){
     //     fmt.Println("Transaction: ", result)
     //   }()
 
+  
     result, err := client.TransferToken(from,to,amount,append)
     if err != nil {
           fmt.Println("Error to transfer token: ", err)

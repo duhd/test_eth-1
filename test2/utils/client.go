@@ -264,19 +264,21 @@ func (c *EthClient) TransferToken(from string,to string,amount string,append str
     		return "", err
     	}
 
-      fmt.Println("Transfer: ", nonce," from ",from," to ",to, " amount: ",amount, " note:",append)
+
 
     	if err := backend.SendTransaction(opts.Context, signedTx); err != nil {
     		return "", err
     	}
       tx := signedTx
 
-
       if err != nil {
           fmt.Println(" Transaction create error: ", err)
           return "",err
       }
-      fmt.Println(" Transaction =",tx.Hash().Hex())
+      diff := time.Now().UnixNano() - requestTime
+      fmt.Println("Transfer: ", nonce," from ",from," to ",to, " amount: ",amount, " note:",append)
+      fmt.Println("Request Duration: ", diff, " Transaction =",tx.Hash().Hex(), z)
+
       // seed := rand.Intn(100)
       // sha.Write([]byte(strconv.Itoa(seed)))
       // key := "Transfer:" + base64.URLEncoding.EncodeToString(sha.Sum(nil))
