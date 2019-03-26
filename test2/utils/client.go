@@ -8,6 +8,9 @@ import (
   "context"
   "test_eth/contracts"
   "math/big"
+    "github.com/go-redis/redis"
+    "encoding/json"
+      "strconv"
   // "github.com/ethereum/go-ethereum"
   "github.com/ethereum/go-ethereum/core/types"
   "github.com/ethereum/go-ethereum/ethclient"
@@ -21,8 +24,17 @@ import (
 // var sha hash.Hash
 type EthClient struct {
 	Client   *ethclient.Client
+  Redis    *redis.Client
 	mux sync.Mutex
 }
+
+type Transaction struct {
+        Id                string  `json:"Id"`
+        RequestTime       int64   `json:"RequestTime"`
+        TxReceiveTime     int64   `json:"TxReceiveTime"`
+        TxConfirmedTime    []int64 `json:"TxConfiredTime"`
+   }
+
 
 func NewEthClient(url string) (*EthClient, error) {
     fmt.Println("Connect to host: ",url)
@@ -31,7 +43,14 @@ func NewEthClient(url string) (*EthClient, error) {
        fmt.Println("Unable to connect to network:%v\n", err)
        return nil, err
     }
-    return &EthClient{Client: cl}, nil
+
+    rd := redis.NewClient(&redis.Options{
+      Addr:     cfg.Redis.Host,
+      Password: cfg.Redis.Password, // no password set
+      DB:       cfg.Redis.Db,  // use default DB
+    })
+
+    return &EthClient{Client: cl, Redis: rd}, nil
 }
 func (c *EthClient) BalaneOf(account string) (*big.Float,error) {
     	c.mux.Lock()
@@ -74,7 +93,7 @@ func (c *EthClient) UpdateReceipt(header *types.Header ){
       for _, transaction := range block.Transactions(){
            fmt.Println("Transaction: ",transaction.Hash().Hex())
            key := strings.TrimPrefix(transaction.Hash().Hex(),"0x")
-           LogEnd(key)
+           c.LogEnd(key)
       }
 }
 func (c *EthClient) TransferTokenRaw(from string,to string,amount string,append string) (string,error) {
@@ -105,7 +124,7 @@ func (c *EthClient) TransferTokenRaw(from string,to string,amount string,append 
 
       fmt.Println("Add contract: ", cfg.Contract.Address)
 
-      
+
       c.mux.Lock()
       defer 	c.mux.Unlock()
       wallet, err1 := contracts.NewVNDWallet(common.HexToAddress(cfg.Contract.Address), c.Client)
@@ -124,7 +143,7 @@ func (c *EthClient) TransferTokenRaw(from string,to string,amount string,append 
       // sha.Write([]byte(strconv.Itoa(seed)))
       // key := "Transfer:" + base64.URLEncoding.EncodeToString(sha.Sum(nil))
       key := strings.TrimPrefix(tx.Hash().Hex(),"0x")
-      LogStart(key,requestTime)
+      c.LogStart(key,requestTime)
 
       return key, nil
 }
@@ -258,17 +277,17 @@ func (c *EthClient) TransferToken(from string,to string,amount string,append str
       // sha.Write([]byte(strconv.Itoa(seed)))
       // key := "Transfer:" + base64.URLEncoding.EncodeToString(sha.Sum(nil))
       key := strings.TrimPrefix(tx.Hash().Hex(),"0x")
-      LogStart(key,requestTime)
+      c.LogStart(key,requestTime)
 
       return key, nil
 }
 func (c *EthClient) getNonce(account string) uint64 {
-     nonce := GetNonce(account)
+     nonce := c.GetNonce(account)
      if nonce == 0 {
         nonce, _ = c.UpdateNoneFromEth(account)
-        CommitNonce(account,nonce)
+        c.CommitNonce(account,nonce)
      }
-     NoneIncr(account)
+     c.NoneIncr(account)
      return nonce
 }
 func (c *EthClient) UpdateNoneFromEth(account string) (uint64,error) {
@@ -291,8 +310,75 @@ func (c *EthClient) UpdateNoneFromEth(account string) (uint64,error) {
       } else {
         nonce = opts.Nonce.Uint64()
       }
-      if CommitNonce(account,nonce) {
+      if c.CommitNonce(account,nonce) {
         fmt.Println("Failed to create authorized transactor: %v", err)
       }
       return nonce,nil
+}
+
+func  (c *EthClient) LogStart(key string,requesttime int64){
+  trans :=  &Transaction{
+              Id: key,
+              RequestTime: requesttime,
+              TxReceiveTime: time.Now().UnixNano()}
+  value, err := json.Marshal(trans)
+  if err != nil {
+      fmt.Println(err)
+      return
+  }
+  err = c.Redis.Set("transaction:" + key,string(value), 0).Err()
+	if err != nil {
+		panic(err)
+	}
+}
+
+func  (c *EthClient)  LogEnd(key string){
+      val, err2 := c.Redis.Get("transaction:" + key).Result()
+      if err2 != nil {
+          fmt.Println("Cannot find transaction: ", key)
+          return
+      }
+      data := &Transaction{}
+      err := json.Unmarshal([]byte(val), data)
+      if err != nil {
+          fmt.Println("Cannot parse data ", err)
+          return
+      }
+      data.TxConfirmedTime = append(data.TxConfirmedTime, time.Now().UnixNano())
+      value, err := json.Marshal(data)
+
+      err = c.Redis.Set("transaction:" + key,string(value), 0).Err()
+    	if err != nil {
+    	     fmt.Println("Cannot set data ", err)
+    	}
+      fmt.Println("Finish write transaction: ", key)
+}
+func  (c *EthClient)  GetNonce(account string) uint64 {
+  val, err := c.Redis.Get("nonce:" + account).Result()
+  if err != nil {
+      fmt.Println("Cannot find nonce of account: ", account)
+      return uint64(0)
+  }
+  value , err := strconv.ParseUint(val, 10, 64)
+  if err != nil {
+      fmt.Println("Cannot parce nonce of ", val)
+      return uint64(0)
+  }
+  return value
+}
+func   (c *EthClient)  CommitNonce(account string, nonce uint64) bool {
+  err := c.Redis.Set("nonce:" + account,uint64(nonce), 0).Err()
+  if err != nil {
+       fmt.Println("Cannot set nonce  ", err)
+       return false
+  }
+  return true
+}
+func  (c *EthClient)  NoneIncr(account string) bool {
+  _, err := c.Redis.Incr("nonce:" + account).Result()
+	if err != nil {
+    fmt.Println("Cannot increase nonce  ", err)
+    return false
+	}
+  return true
 }

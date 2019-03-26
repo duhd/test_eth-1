@@ -1,5 +1,5 @@
 webserver:
-  port: 8000
+  port: "8080"
   maxrpc: 1000
 keys:
   keystore: ./keystore
@@ -22,4 +22,4 @@ contract:
   initialToken: 100000000000000
   masterkey1: 0xbea868edea1c167aab5a0eef99496e2a690f3fae
   masterkey2: 0x0e18db9aeea79d71b4c91c8375f1ef7fd0aaa594
-  address: 0x495303d2FaCEaFa41B20aAab3f6AeCcf797D7528
+  address: 0xF1A79b3123Eb75a7cf1230601383F8dA484a55A6

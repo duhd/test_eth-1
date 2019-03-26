@@ -6,18 +6,12 @@ import (
   "io/ioutil"
   "strings"
   "path/filepath"
-  "encoding/json"
-  "time"
+  // "encoding/json"
+  // "time"
   "github.com/go-redis/redis"
-  "strconv"
+  // "strconv"
 )
 
-type Transaction struct {
-        Id                string  `json:"Id"`
-        RequestTime       int64   `json:"RequestTime"`
-        TxReceiveTime     int64   `json:"TxReceiveTime"`
-        TxConfirmedTime    []int64 `json:"TxConfiredTime"`
-   }
 
 var Redis_client *redis.Client
 
@@ -56,71 +50,4 @@ func LoadKeyStores(root string){
               }
          }
     }
-}
-
-func LogStart(key string,requesttime int64){
-  trans :=  &Transaction{
-              Id: key,
-              RequestTime: requesttime,
-              TxReceiveTime: time.Now().UnixNano()}
-  value, err := json.Marshal(trans)
-  if err != nil {
-      fmt.Println(err)
-      return
-  }
-  err = Redis_client.Set("transaction:" + key,string(value), 0).Err()
-	if err != nil {
-		panic(err)
-	}
-}
-
-func LogEnd(key string){
-      val, err2 := Redis_client.Get("transaction:" + key).Result()
-      if err2 != nil {
-          fmt.Println("Cannot find transaction: ", key)
-          return
-      }
-      data := &Transaction{}
-      err := json.Unmarshal([]byte(val), data)
-      if err != nil {
-          fmt.Println("Cannot parse data ", err)
-          return
-      }
-      data.TxConfirmedTime = append(data.TxConfirmedTime, time.Now().UnixNano())
-      value, err := json.Marshal(data)
-
-      err = Redis_client.Set("transaction:" + key,string(value), 0).Err()
-    	if err != nil {
-    	     fmt.Println("Cannot set data ", err)
-    	}
-      fmt.Println("Finish write transaction: ", key)
-}
-func GetNonce(account string) uint64 {
-  val, err := Redis_client.Get("nonce:" + account).Result()
-  if err != nil {
-      fmt.Println("Cannot find nonce of account: ", account)
-      return uint64(0)
-  }
-  value , err := strconv.ParseUint(val, 10, 64)
-  if err != nil {
-      fmt.Println("Cannot parce nonce of ", val)
-      return uint64(0)
-  }
-  return value
-}
-func CommitNonce(account string, nonce uint64) bool {
-  err := Redis_client.Set("nonce:" + account,uint64(nonce), 0).Err()
-  if err != nil {
-       fmt.Println("Cannot set nonce  ", err)
-       return false
-  }
-  return true
-}
-func NoneIncr(account string) bool {
-  _, err := Redis_client.Incr("nonce:" + account).Result()
-	if err != nil {
-    fmt.Println("Cannot increase nonce  ", err)
-    return false
-	}
-  return true
 }
