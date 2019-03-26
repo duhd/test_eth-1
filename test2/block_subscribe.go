@@ -50,12 +50,12 @@ func listening_block_from_host(httpUrl string, socketUrl string ){
 				return
 		}
 
-		max_client := 10
+		max_client := 5
 		var clients []*utils.EthClient
 		var current int = 0
 
 		for i:=0; i< max_client; i++ {
-			ethclient, err := utils.NewEthClient(httpUrl)
+			ethclient, err := utils.NewEthClient(socketUrl)
 			if err != nil {
 				log.Fatal("Cannot connect to: ",httpUrl," error:", err)
 				continue
