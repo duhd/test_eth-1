@@ -277,7 +277,7 @@ func (c *EthClient) TransferToken(from string,to string,amount string,append str
       }
       diff := time.Now().UnixNano() - requestTime
       fmt.Println("Transfer: ", nonce," from ",from," to ",to, " amount: ",amount, " note:",append)
-      fmt.Println("Request Duration: ", diff, " Transaction =",tx.Hash().Hex(), z)
+      fmt.Println("Request Duration: ", diff, " Transaction =",tx.Hash().Hex())
 
       // seed := rand.Intn(100)
       // sha.Write([]byte(strconv.Itoa(seed)))
