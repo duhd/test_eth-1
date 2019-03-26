@@ -65,7 +65,7 @@ func main() {
       v1.GET("/wallet/:method/:p1", processCall)
       v1.GET("/wallet/:method", processCall)
    }
-   router.Run()
+   router.Run(":"+ cfg.Webserver.Port)
 }
 
 // createTodo add a new todo

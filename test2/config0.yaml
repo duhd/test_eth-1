@@ -1,3 +1,5 @@
+webserver:
+  port: 8000
 keys:
   keystore: ./keystore
   password: "123456"

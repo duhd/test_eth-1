@@ -10,6 +10,9 @@ import (
 )
 
 type Config struct {
+    Webserver struct {
+			  Port string `yaml:"port"`
+		} `yaml:"webserver"`
 		Keys  struct {
 			  Keystore string `yaml:"keystore"`
 				Password string `yaml:"password"`
