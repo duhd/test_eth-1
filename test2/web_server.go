@@ -38,6 +38,7 @@ func init() {
    })
 
    utils.DeleteData("transaction*")
+   utils.DeleteData("nonce*")
 
    // sha = sha1.New()
    utils.LoadKeyStores(cfg.Keys.Keystore)
