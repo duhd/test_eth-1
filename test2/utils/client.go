@@ -183,15 +183,18 @@ func (c *EthClient) TransferToken(from string,to string,amount string,append str
     	if value == nil {
     		value = new(big.Int)
     	}
-    	var nonce uint64
-    	if opts.Nonce == nil {
-    		nonce, err = backend.PendingNonceAt(context.Background(), opts.From)
-    		if err != nil {
-    			return "", fmt.Errorf("failed to retrieve account nonce: %v", err)
-    		}
-    	} else {
-    		nonce = opts.Nonce.Uint64()
-    	}
+
+    	// var nonce uint64
+    	// if opts.Nonce == nil {
+    	// 	nonce, err = backend.PendingNonceAt(context.Background(), opts.From)
+    	// 	if err != nil {
+    	// 		return "", fmt.Errorf("failed to retrieve account nonce: %v", err)
+    	// 	}
+    	// } else {
+    	// 	nonce = opts.Nonce.Uint64()
+    	// }
+
+      nonce := c.getNonce(from)
     	// Figure out the gas allowance and gas price values
     	// gasPrice := opts.GasPrice
     	// if gasPrice == nil {
@@ -255,4 +258,37 @@ func (c *EthClient) TransferToken(from string,to string,amount string,append str
       LogStart(key,requestTime)
 
       return key, nil
+}
+func (c *EthClient) getNonce(account string) uint64 {
+     nonce := GetNonce(account)
+     if nonce == 0 {
+        nonce, _ = c.UpdateNoneFromEth(account)
+     }
+     CommitNonce(account,nonce + 1)
+     return nonce
+}
+func (c *EthClient) UpdateNoneFromEth(account string) (uint64,error) {
+      keyjson, err := Redis_client.Get("account:"+account).Result()
+      if err != nil {
+          return 0, err
+      }
+
+      opts, err := bind.NewTransactor(strings.NewReader(keyjson),cfg.Keys.Password)
+      if err != nil {
+            fmt.Println("Failed to create authorized transactor: %v", err)
+            return 0, err
+      }
+      var nonce uint64
+      if opts.Nonce == nil {
+        nonce, err = c.Client.PendingNonceAt(context.Background(), opts.From)
+        if err != nil {
+          return 0, fmt.Errorf("failed to retrieve account nonce: %v", err)
+        }
+      } else {
+        nonce = opts.Nonce.Uint64()
+      }
+      if CommitNonce(account,nonce) {
+        fmt.Println("Failed to create authorized transactor: %v", err)
+      }
+      return nonce,nil
 }

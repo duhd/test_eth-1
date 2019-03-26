@@ -9,6 +9,7 @@ import (
   "encoding/json"
   "time"
   "github.com/go-redis/redis"
+  "strconv"
 )
 
 type Transaction struct {
@@ -93,4 +94,25 @@ func LogEnd(key string){
     	     fmt.Println("Cannot set data ", err)
     	}
       fmt.Println("Finish write transaction: ", key)
+}
+func GetNonce(account string) uint64 {
+  val, err := Redis_client.Get("nonce:" + account).Result()
+  if err != nil {
+      fmt.Println("Cannot find nonce of account: ", account)
+      return uint64(0)
+  }
+  value , err := strconv.ParseUint(val, 10, 64)
+  if err != nil {
+      fmt.Println("Cannot parce nonce of ", val)
+      return uint64(0)
+  }
+  return value
+}
+func CommitNonce(account string, nonce uint64) bool {
+  err := Redis_client.Set("nonce:" + account,uint64(nonce), 0).Err()
+  if err != nil {
+       fmt.Println("Cannot set nonce  ", err)
+       return false
+  }
+  return true
 }
