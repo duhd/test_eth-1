@@ -38,7 +38,7 @@ type Transaction struct {
 
 func NewEthClient(url string) (*EthClient, error) {
     fmt.Println("Connect to host: ",url)
-    cl, err  := ethclient.Dial("http://" + url)
+    cl, err  := ethclient.Dial("ws://" + url)
     if err != nil {
        fmt.Println("Unable to connect to network:%v\n", err)
        return nil, err
@@ -275,7 +275,7 @@ func (c *EthClient) TransferToken(from string,to string,amount string,append str
           fmt.Println(" Transaction create error: ", err)
           return "",err
       }
-      diff := time.Now().UnixNano() - requestTime
+      diff := (time.Now().UnixNano() - requestTime)/1000000000
       fmt.Println("Transfer: ", nonce," from ",from," to ",to, " amount: ",amount, " note:",append)
       fmt.Println("Request Duration: ", diff, " Transaction =",tx.Hash().Hex())
 

@@ -48,7 +48,7 @@ func init() {
     max_connection := cfg.Webserver.MaxRpcConnection
     for i:=0 ; i<max_connection; i++ {
          for _,host := range cfg.Networks {
-              ethclient, err := utils.NewEthClient(host.Http)
+              ethclient, err := utils.NewEthClient(host.WebSocket)
               if err != nil {
                 continue
               }
@@ -128,7 +128,7 @@ func transfer(c *gin.Context){
     //     fmt.Println("Transaction: ", result)
     //   }()
 
-  
+
     result, err := client.TransferToken(from,to,amount,append)
     if err != nil {
           fmt.Println("Error to transfer token: ", err)
