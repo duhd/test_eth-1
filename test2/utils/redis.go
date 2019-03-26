@@ -116,3 +116,11 @@ func CommitNonce(account string, nonce uint64) bool {
   }
   return true
 }
+func NoneIncr(account string) bool {
+  _, err := Redis_client.Incr("nonce:" + account).Result()
+	if err != nil {
+    fmt.Println("Cannot increase nonce  ", err)
+    return false
+	}
+  return true
+}

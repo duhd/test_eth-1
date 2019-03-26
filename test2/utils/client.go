@@ -263,8 +263,9 @@ func (c *EthClient) getNonce(account string) uint64 {
      nonce := GetNonce(account)
      if nonce == 0 {
         nonce, _ = c.UpdateNoneFromEth(account)
+        CommitNonce(account,nonce)
      }
-     CommitNonce(account,nonce + 1)
+     NoneIncr(account)
      return nonce
 }
 func (c *EthClient) UpdateNoneFromEth(account string) (uint64,error) {
