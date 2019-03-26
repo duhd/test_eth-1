@@ -78,8 +78,7 @@ func (c *EthClient) UpdateReceipt(header *types.Header ){
       }
 }
 func (c *EthClient) TransferTokenRaw(from string,to string,amount string,append string) (string,error) {
-    	c.mux.Lock()
-      defer 	c.mux.Unlock()
+
 
       requestTime := time.Now().UnixNano()
 
@@ -105,6 +104,10 @@ func (c *EthClient) TransferTokenRaw(from string,to string,amount string,append 
       note :=  fmt.Sprintf("Transaction:  %s", append)
 
       fmt.Println("Add contract: ", cfg.Contract.Address)
+
+      
+      c.mux.Lock()
+      defer 	c.mux.Unlock()
       wallet, err1 := contracts.NewVNDWallet(common.HexToAddress(cfg.Contract.Address), c.Client)
       if err1 != nil {
          fmt.Println("Unable to bind to deployed instance of contract:%v\n")
