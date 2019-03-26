@@ -207,17 +207,17 @@ func (c *EthClient) TransferToken(from string,to string,amount string,append str
     		value = new(big.Int)
     	}
 
-    	// var nonce uint64
-    	// if opts.Nonce == nil {
-    	// 	nonce, err = backend.PendingNonceAt(context.Background(), opts.From)
-    	// 	if err != nil {
-    	// 		return "", fmt.Errorf("failed to retrieve account nonce: %v", err)
-    	// 	}
-    	// } else {
-    	// 	nonce = opts.Nonce.Uint64()
-    	// }
+    	var nonce uint64
+    	if opts.Nonce == nil {
+    		nonce, err = backend.PendingNonceAt(context.Background(), opts.From)
+    		if err != nil {
+    			return "", fmt.Errorf("failed to retrieve account nonce: %v", err)
+    		}
+    	} else {
+    		nonce = opts.Nonce.Uint64()
+    	}
 
-      nonce := c.getNonce(from)
+      //nonce := c.getNonce(from)
     	// Figure out the gas allowance and gas price values
     	// gasPrice := opts.GasPrice
     	// if gasPrice == nil {
