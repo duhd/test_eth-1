@@ -1,4 +1,6 @@
 ###   Support functions
+go get github.com/btfak/sntp
+go get -u github.com/beevik/ntp
 
 abigen -sol VNDWallet.sol -pkg contracts -out vndwallet.go
 

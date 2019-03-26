@@ -117,14 +117,18 @@ func transfer(c *gin.Context){
 
     fmt.Println("Transfer: ", current," from ",from," to ",to, " amount: ",amount, " note:",append)
     client := clients[current]
-    result, err := client.TransferToken(from,to,amount,append)
+
+    go func() {
+        result, err := client.TransferToken(from,to,amount,append)
+        if err != nil {
+            fmt.Println("Error to transfer token: ", err)
+            return
+        }
+        fmt.Println("Transaction: ", result)
+      }()
     current = current + 1
     current = current % len(clients)
-    if err != nil {
-        c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "error": err})
-        return
-    }
-    c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "transaction hash": result})
+    c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "transaction": "Processing"})
 }
 // call transfer token
 func balance(c *gin.Context){
@@ -155,7 +159,9 @@ func report(c *gin.Context){
     }
 
     fmt.Println("Elements: ", len(keys))
+    diff_arr1 := []int64{}
     diff_arr := []int64{}
+
     for _, element := range vals {
         data := &utils.Transaction{}
         err2 := json.Unmarshal([]byte(element.(string)), data)
@@ -165,6 +171,7 @@ func report(c *gin.Context){
         }
         fmt.Println("ID:",data.Id,"RequestTime:",data.RequestTime,
           "TxReceiveTime:",data.TxReceiveTime,"TxConfirmedTime:",data.TxConfirmedTime)
+
         var max int64 = 0
         if data.TxConfirmedTime != nil {
             for _,value := range data.TxConfirmedTime {
@@ -172,7 +179,8 @@ func report(c *gin.Context){
                    max = value
                 }
             }
-
+            diff1 := data.TxReceiveTime - data.RequestTime
+            diff_arr1 = append(diff_arr1,diff1)
         }
         // else {
         //     max = time.Now().UnixNano()
@@ -184,6 +192,16 @@ func report(c *gin.Context){
 
 
     }
+    var total1 int64 = 0
+  	for _, value1:= range diff_arr1 {
+  		total1 += value1
+  	}
+    len1 := int64(len(diff_arr1))
+    var avg1 int64 = 0
+    if len1 >0 {
+      	avg1 = total1/(len1 *1000)
+    }
+
     var total int64 = 0
   	for _, value:= range diff_arr {
   		total += value
@@ -194,7 +212,7 @@ func report(c *gin.Context){
       	avg = total/(len *1000)
     }
 
-    c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "Total": len, "Avg": avg})
+    c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "Total": len, "Avg RequestTime": avg1, "Avg Onchain": avg})
 }
 func accounts(c *gin.Context){
     keys, err  := utils.Redis_client.Keys("account*").Result()
