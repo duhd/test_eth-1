@@ -152,12 +152,12 @@ func (c *EthClient) UpdateReceipt(header *types.Header ){
 
 
 func (c *EthClient) TransferToken(from string,to string,amount string,append string) (string,error) {
-    	c.mux.Lock()
-      defer 	c.mux.Unlock()
+    	// c.mux.Lock()
+      // defer 	c.mux.Unlock()
 
       requestTime := time.Now().UnixNano()
 
-      keyjson, err := Redis_client.Get("account:"+from).Result()
+      keyjson, err := c.Redis.Get("account:"+from).Result()
       if err != nil {
           return "", err
       }
@@ -177,6 +177,9 @@ func (c *EthClient) TransferToken(from string,to string,amount string,append str
       }
 
       note :=  fmt.Sprintf("Transaction:  %s", append)
+
+      prepareAccountTime := time.Now().UnixNano()
+
 
     //  fmt.Println("Add contract: ", cfg.Contract.Address)
       contract_address := common.HexToAddress(cfg.Contract.Address)
@@ -206,6 +209,8 @@ func (c *EthClient) TransferToken(from string,to string,amount string,append str
     	if value == nil {
     		value = new(big.Int)
     	}
+
+      prepareContractTime := time.Now().UnixNano()
 
     	var nonce uint64
     	if opts.Nonce == nil {
@@ -251,6 +256,8 @@ func (c *EthClient) TransferToken(from string,to string,amount string,append str
 
       var gasLimit uint64 = 40818
 
+      nonceTime := time.Now().UnixNano()
+
     	// Create the transaction, sign it and schedule it for execution
     	var rawTx *types.Transaction
       rawTx = types.NewTransaction(nonce, contract_address, value, gasLimit, gasPrice, input)
@@ -265,6 +272,7 @@ func (c *EthClient) TransferToken(from string,to string,amount string,append str
     	}
 
 
+      signTime := time.Now().UnixNano()
 
     	if err := backend.SendTransaction(opts.Context, signedTx); err != nil {
     		return "", err
@@ -275,9 +283,13 @@ func (c *EthClient) TransferToken(from string,to string,amount string,append str
           fmt.Println(" Transaction create error: ", err)
           return "",err
       }
-      diff := (time.Now().UnixNano() - requestTime)/1000000000
+      diff1 := (prepareAccountTime - requestTime)/1000000000
+      diff2 := (prepareContractTime - prepareAccountTime)/1000000000
+      diff3 := (nonceTime - prepareContractTime)/1000000000
+      diff4 := (signTime - nonceTime)/1000000000
+      diff5 := (time.Now().UnixNano() - signTime)/1000000000
       fmt.Println("Transfer: ", nonce," from ",from," to ",to, " amount: ",amount, " note:",append)
-      fmt.Println("Request Duration: ", diff, " Transaction =",tx.Hash().Hex())
+      fmt.Println("prepareAccountTime,prepareContractTime, nonceTime,signTime, trasactionTime : ", diff1,diff2,diff3,diff4,diff5, " Transaction =",tx.Hash().Hex())
 
       // seed := rand.Intn(100)
       // sha.Write([]byte(strconv.Itoa(seed)))
