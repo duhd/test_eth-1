@@ -44,7 +44,7 @@ func init() {
 
 
     //Load all wallets in hosts
-    max_connection := 100
+    max_connection := cfg.Webserver.MaxRpcConnection
     for i:=0 ; i<max_connection; i++ {
          for _,host := range cfg.Networks {
               ethclient, err := utils.NewEthClient(host.Http)

@@ -12,6 +12,7 @@ import (
 type Config struct {
     Webserver struct {
 			  Port string `yaml:"port"`
+        MaxRpcConnection int `yaml:"maxrpc"`
 		} `yaml:"webserver"`
 		Keys  struct {
 			  Keystore string `yaml:"keystore"`
