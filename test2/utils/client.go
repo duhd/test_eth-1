@@ -152,8 +152,8 @@ func (c *EthClient) UpdateReceipt(header *types.Header ){
 
 
 func (c *EthClient) TransferToken(from string,to string,amount string,append string) (string,error) {
-    	// c.mux.Lock()
-      // defer 	c.mux.Unlock()
+    	c.mux.Lock()
+      defer 	c.mux.Unlock()
 
       requestTime := time.Now().UnixNano()
 
@@ -161,12 +161,14 @@ func (c *EthClient) TransferToken(from string,to string,amount string,append str
       if err != nil {
           return "", err
       }
+      redisTime := time.Now().UnixNano()
 
       auth, err := bind.NewTransactor(strings.NewReader(keyjson),cfg.Keys.Password)
       if err != nil {
             fmt.Println("Failed to create authorized transactor: %v", err)
             return "", err
       }
+      transactorTime := time.Now().UnixNano()
 
       to_address := common.HexToAddress(to)
       value_transfer := new(big.Int)
@@ -283,13 +285,15 @@ func (c *EthClient) TransferToken(from string,to string,amount string,append str
           fmt.Println(" Transaction create error: ", err)
           return "",err
       }
-      diff1 := (prepareAccountTime - requestTime)/1000000000
-      diff2 := (prepareContractTime - prepareAccountTime)/1000000000
-      diff3 := (nonceTime - prepareContractTime)/1000000000
-      diff4 := (signTime - nonceTime)/1000000000
-      diff5 := (time.Now().UnixNano() - signTime)/1000000000
+      diff0 := (redisTime - requestTime)/1000000
+      diff01 := (transactorTime - redisTime)/1000000
+      diff1 := (prepareAccountTime - transactorTime)/1000000
+      diff2 := (prepareContractTime - prepareAccountTime)/1000000
+      diff3 := (nonceTime - prepareContractTime)/1000000
+      diff4 := (signTime - nonceTime)/1000000
+      diff5 := (time.Now().UnixNano() - signTime)/1000000
       fmt.Println("Transfer: ", nonce," from ",from," to ",to, " amount: ",amount, " note:",append)
-      fmt.Println("prepareAccountTime,prepareContractTime, nonceTime,signTime, trasactionTime : ", diff1,diff2,diff3,diff4,diff5, " Transaction =",tx.Hash().Hex())
+      fmt.Println("redisTime, transactorTime, prepareAccountTime,prepareContractTime, nonceTime,signTime, trasactionTime : ",diff0,diff01, diff1,diff2,diff3,diff4,diff5, " Transaction =",tx.Hash().Hex())
 
       // seed := rand.Intn(100)
       // sha.Write([]byte(strconv.Itoa(seed)))
