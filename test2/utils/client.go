@@ -359,11 +359,11 @@ func (c *EthClient) TransferToken(from string,to string,amount string,append str
 
       prepareContractTime := time.Now().UnixNano()
 
-      // nonce, err := backend.PendingNonceAt(context.Background(), keyAddr)
-      // if err != nil {
-      //   return "", fmt.Errorf("failed to retrieve account nonce: %v", err)
-      // }
-      nonce := c.getNonce(from)
+      nonce, err := backend.PendingNonceAt(context.Background(), keyAddr)
+      if err != nil {
+        return "", fmt.Errorf("failed to retrieve account nonce: %v", err)
+      }
+      //nonce := c.getNonce(from)
 
       gasPrice := new(big.Int)
       gasPrice, ok = gasPrice.SetString(cfg.Contract.GasPrice, 10)
@@ -400,13 +400,13 @@ func (c *EthClient) TransferToken(from string,to string,amount string,append str
     	}
       tx := signedTx
 
-      diff0 := (redisTime - requestTime)/1000000
-      diff01 := (decryptTime - redisTime)/1000000
-      diff1 := (prepareAccountTime - decryptTime)/1000000
-      diff2 := (prepareContractTime - prepareAccountTime)/1000000
-      diff3 := (nonceTime - prepareContractTime)/1000000
-      diff4 := (signTime - nonceTime)/1000000
-      diff5 := (time.Now().UnixNano() - signTime)/1000000
+      diff0 := (redisTime - requestTime)/1000
+      diff01 := (decryptTime - redisTime)/1000
+      diff1 := (prepareAccountTime - decryptTime)/1000
+      diff2 := (prepareContractTime - prepareAccountTime)/1000
+      diff3 := (nonceTime - prepareContractTime)/1000
+      diff4 := (signTime - nonceTime)/1000
+      diff5 := (time.Now().UnixNano() - signTime)/1000
       fmt.Println("Transfer: ", nonce," from ",from," to ",to, " amount: ",amount, " note:",append)
       fmt.Println("redisTime, decryptTime, prepareAccountTime,prepareContractTime, nonceTime,signTime, trasactionTime : ",diff0,diff01, diff1,diff2,diff3,diff4,diff5, " Transaction =",tx.Hash().Hex())
 
