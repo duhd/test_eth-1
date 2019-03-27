@@ -52,7 +52,7 @@ func main(){
 		method := "txpool_content"
 		client, err := rpc.DialContext(ctx, server)
 		if err != nil {
-			log.Fatalf("Unable to connect to network:%v\n", err)
+			fmt.Println("Unable to connect to network:%v\n", err)
 		}
 		var result map[string]map[string]map[string][]*RPCTransaction
 		client.CallContext(ctx, &result, method)
