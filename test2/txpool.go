@@ -57,7 +57,7 @@ func main(){
 		var result map[string]map[string]map[string][]*RPCTransaction
 		client.CallContext(ctx, &result, method)
 
-		fmt.Println("Result:")
+		fmt.Println("Result:",result)
 
 		for key, value := range result {
 	    fmt.Println("Key:", key, "Value:", value)
