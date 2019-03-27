@@ -510,7 +510,7 @@ func (c *EthClient) TransferToken(from string,to string,amount string,append str
       signTime := time.Now().UnixNano()
       if c.LogStart(tx_hash,requestTime) {
          if err := backend.SendTransaction(context.Background(), signedTx); err != nil {
-            fmt.Println("Send Transaction error: ", err)
+            fmt.Println("Send Transaction Nonce:", nonce ," error: ", err)
            return "", err
          }
       }
