@@ -63,7 +63,7 @@ func main(){
 		client.CallContext(ctx, &result, method)
 		//fmt.Println("Result:",result)
 		for key, value := range result {
-	    fmt.Println("Key:", key
+	    fmt.Println("Key:", key)
 			for key1, value1 := range value {
 				fmt.Println("Key:", key1)
 				for key2, value2 := range value1 {
