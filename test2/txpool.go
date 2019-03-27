@@ -55,21 +55,30 @@ func main(){
 		client, err := rpc.DialContext(ctx, server)
 		if err != nil {
 			fmt.Println("Unable to connect to network:%v\n", err)
+			return
 		}
 
-		// method := "txpool_content"
-		// var result map[string]map[string]map[string][]*RPCTransaction
+		method := "txpool_content"
+		var result map[string]map[string]map[string][]*RPCTransaction
+		client.CallContext(ctx, &result, method)
+		//fmt.Println("Result:",result)
+		for key, value := range result {
+	    //fmt.Println("Key:", key, "Value:", value)
+			for key1, value1 := range value {
+				//fmt.Println("Key:", key, "Value:", value)
+				for key2, value2 := range value1 {
+						for key3, value3 := range value2 {
+							 fmt.Println(key, "-", key1,"-",key2,"-",key3,": Nonce: ",value3.Nonce)
+						}
+				}
+			}
+		}
+
+		// method := "txpool_inspect"
+		// var result map[string]map[string]map[string][]string
 		// client.CallContext(ctx, &result, method)
 		// fmt.Println("Result:",result)
 		// for key, value := range result {
-	  //   fmt.Println("Key:", key, "Value:", value)
+		// 	fmt.Println("Key:", key, "Value:", value)
 		// }
-
-		method := "txpool_inspect"
-		var result map[string]map[string]map[string][]string
-		client.CallContext(ctx, &result, method)
-		fmt.Println("Result:",result)
-		for key, value := range result {
-			fmt.Println("Key:", key, "Value:", value)
-		}
 }
