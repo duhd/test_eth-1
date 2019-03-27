@@ -8,6 +8,7 @@ import (
 	"github.com/ethereum/go-ethereum/rpc"
 	// "github.com/ethereum/go-ethereum/p2p"
 	"fmt"
+	"strconv"
 	// "test_eth/test2/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -69,7 +70,7 @@ func main(){
 			for key1, value1 := range value {
 				//fmt.Println(key, key1)
 				for key2, value2 := range value1 {
-						nonce := strconv.ParseUint(key3, 10, 64)
+						nonce := strconv.ParseUint(key2, 10, 64)
 						if min == 0 {
 							min = nonce
 						}else{
