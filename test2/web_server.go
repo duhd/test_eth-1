@@ -218,7 +218,7 @@ func report(c *gin.Context){
   	for _, value:= range diff_arr {
   		total += value
   	}
-    len1 := in64(len(keys))
+    len1 := int64(len(keys))
     len := int64(len(diff_arr))
     var avg int64 = 0
     if len >0 {
