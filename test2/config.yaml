@@ -1,7 +1,7 @@
 webserver:
   port: "8080"
   maxrpc: 10
-  maxlistenrpc: 10
+  maxlistenrpc: 1
 keys:
   keystore: ./keystore
   password: "123456"

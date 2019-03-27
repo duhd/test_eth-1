@@ -29,8 +29,7 @@ var Redis_client *redis.Client
 var Wallets []*WalletAccount
 
 func (w *WalletAccount) GetNonce() uint64 {
-    atomic.AddUint64(&w.Nonce, 1)
-    nonce := atomic.LoadUint64(&w.Nonce)
+    nonce := atomic.AddUint64(&w.Nonce, 1)
     fmt.Println("Get Nonce:",nonce)
     return nonce
 }
