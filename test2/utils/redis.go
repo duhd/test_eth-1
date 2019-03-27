@@ -36,7 +36,7 @@ func (w *WalletAccount) GetNonce() uint64 {
 }
 
 func (w *WalletAccount) UpdateNonce(nonce uint64)  {
-    fmt.Println("Update Nonce:",nonce)
+    fmt.Println("Update: ",w.Address," Nonce:",nonce)
     atomic.StoreUint64(&w.Nonce, nonce)
 }
 
@@ -46,7 +46,7 @@ func SyncNonce(backend   *ethclient.Client){
     nonce, err := backend.PendingNonceAt(context.Background(), keyAddr)
     if err != nil {
       fmt.Errorf("failed to retrieve account nonce: %v", err)
-      nonce = 0 
+      nonce = 0
     }
     fmt.Println("Nonce from eth: ",nonce)
     wallet.UpdateNonce(nonce)

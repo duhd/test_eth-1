@@ -90,7 +90,7 @@ func (c *EthClient) UpdateReceipt(header *types.Header ){
 
       block, err := c.Client.BlockByHash(context.Background(), header.Hash())
       if err != nil {
-        fmt.Println("Errror blockbyhash: ",err)
+        fmt.Println("Error block by hash: ",err)
         return
         //log.Fatal(err)
       }
@@ -393,12 +393,19 @@ func (c *EthClient) TransferToken3(from string,to string,amount string,append st
       tx_hash := strings.TrimPrefix(signedTx.Hash().Hex(),"0x")
 
       signTime := time.Now().UnixNano()
-      if c.LogStart(tx_hash,requestTime) {
-         if err := backend.SendTransaction(context.Background(), signedTx); err != nil {
-            fmt.Println("Send Transaction error: ", err)
-           return "", err
-         }
-      }
+      c.LogStart(tx_hash,requestTime)
+
+      
+      if err := backend.SendTransaction(context.Background(), signedTx); err != nil {
+          fmt.Println("Send Transaction:",tx_hash," error: ", err)
+          return "", err
+       }
+      // if c.LogStart(tx_hash,requestTime) {
+      //    if err := backend.SendTransaction(context.Background(), signedTx); err != nil {
+      //       fmt.Println("Send Transaction error: ", err)
+      //      return "", err
+      //    }
+      // }
       diff0 := (redisTime - requestTime)/1000
       diff01 := (decryptTime - redisTime)/1000
       diff1 := (prepareAccountTime - decryptTime)/1000
@@ -552,27 +559,21 @@ func (c *EthClient) UpdateNoneFromEth(account string) (uint64,error) {
 }
 
 func  (c *EthClient) LogStart(key string,requesttime int64) bool {
-  _, err2 := c.Redis.Get("transaction:" + key).Result()
-  if err2 != nil {
-        trans :=  &Transaction{
-                    Id: key,
-                    RequestTime: requesttime,
-                    TxReceiveTime: time.Now().UnixNano()}
-        value, err := json.Marshal(trans)
-        if err != nil {
-            fmt.Println(err)
-            return false
-        }
-        err = c.Redis.Set("transaction:" + key,string(value), 0).Err()
-      	if err != nil {
-      		panic(err)
-          return false
-      	}
-        return true
-  }else{
-      fmt.Println("Conflict nonce, same transaction: ",key)
+  trans :=  &Transaction{
+              Id: key,
+              RequestTime: requesttime,
+              TxReceiveTime: time.Now().UnixNano()}
+  value, err := json.Marshal(trans)
+  if err != nil {
+      fmt.Println(err)
+      return false
   }
-  return false
+  err = c.Redis.Set("transaction:" + key,string(value), 0).Err()
+  if err != nil {
+    fmt.Println("Write transaction to redis error: ", err)
+    return false
+  }
+  return true
 }
 
 func  (c *EthClient)  LogEnd(key string){
@@ -596,6 +597,7 @@ func  (c *EthClient)  LogEnd(key string){
     	}
       fmt.Println("Finish write transaction: ", key)
 }
+
 func  (c *EthClient)  GetNonce(account string) uint64 {
   val, err := c.Redis.Get("nonce:" + account).Result()
   if err != nil {
