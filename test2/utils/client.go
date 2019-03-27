@@ -579,8 +579,7 @@ func  (c *EthClient) LogStart(key string,requesttime int64) bool {
           return false
       	}
         return true
-  }
-  else{
+  }else{
       fmt.Println("Conflict nonce, same transaction: ",key)
   }
   return false
