@@ -132,7 +132,7 @@ func transfer(c *gin.Context){
     result, err := client.TransferToken(from,to,amount,append)
     if err != nil {
           fmt.Println("Error to transfer token: ", err)
-         c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "error": err})
+          c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "error": err})
           return
     }
     current = current + 1
