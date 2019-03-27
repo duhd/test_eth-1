@@ -322,7 +322,7 @@ func (c *EthClient) TransferToken(from string,to string,amount string,append str
       privateKey := crypto.ToECDSAUnsafe([]byte(privatejson))
 
       //keyAddr := crypto.PubkeyToAddress(key.PrivateKey.PublicKey)
-      //keyAddr := common.HexToAddress(from)
+      keyAddr := common.HexToAddress(from)
 
       decryptTime := time.Now().UnixNano()
 
