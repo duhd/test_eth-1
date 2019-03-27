@@ -14,6 +14,8 @@ import (
 	"time"
 )
 
+var cfg *utils.Config
+
 func main() {
 	var wg sync.WaitGroup
 
@@ -22,7 +24,7 @@ func main() {
 			config_file = os.Args[1]
 	 }
 
-	 	cfg := utils.LoadConfig(config_file)
+	 	cfg = utils.LoadConfig(config_file)
 
 		//Creat redis connection
 		utils.Redis_client = redis.NewClient(&redis.Options{
@@ -50,7 +52,8 @@ func listening_block_from_host(httpUrl string, socketUrl string ){
 				return
 		}
 
-		max_client := 5
+		max_client := cfg.Webserver.MaxListenRpcConnection
+
 		var clients []*utils.EthClient
 		var current int = 0
 

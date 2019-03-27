@@ -376,8 +376,8 @@ func (c *EthClient) TransferToken(from string,to string,amount string,append str
       }
 
       gasPrice := new(big.Int)
-      gasPrice, ok = gasPrice.SetString("1000", 10)
-      var gasLimit uint64 = 40818
+      gasPrice, ok = gasPrice.SetString(cfg.Contract.GasPrice, 10)
+      var gasLimit uint64 = cfg.Contract.GasLimit
 
       nonceTime := time.Now().UnixNano()
 

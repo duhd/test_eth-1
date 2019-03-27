@@ -13,6 +13,7 @@ type Config struct {
     Webserver struct {
 			  Port string `yaml:"port"`
         MaxRpcConnection int `yaml:"maxrpc"`
+        MaxListenRpcConnection int `yaml:"maxlistenrpc"`
 		} `yaml:"webserver"`
 		Keys  struct {
 			  Keystore string `yaml:"keystore"`
@@ -30,6 +31,8 @@ type Config struct {
 			  Db int `yaml:"db"`
 		} `yaml:"redis"`
 		Contract struct {
+        GasPrice string `yaml:"gasprice"`
+        GasLimit uint64 `yaml:"gaslimit"`
 				Owner string `yaml:"owner"`
 				InitialToken int64 `yaml:"initialToken"`
 				MasterKey1 string `yaml:"masterkey1"`
