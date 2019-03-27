@@ -37,7 +37,7 @@ func (w *WalletAccount) GetNonce() uint64 {
 
 func (w *WalletAccount) UpdateNonce(nonce uint64)  {
     fmt.Println("Update: ",w.Address," Nonce:",nonce)
-    atomic.StoreUint64(&w.Nonce, nonce)
+    atomic.StoreUint64(&w.Nonce, nonce-1)
 }
 
 func SyncNonce(backend   *ethclient.Client){
