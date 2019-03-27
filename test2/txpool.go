@@ -65,9 +65,9 @@ func main(){
 		for key, value := range result {
 	    fmt.Println("Key:", key)
 			for key1, value1 := range value {
-				fmt.Println("Key:", key1)
+				fmt.Println(key, key1)
 				for key2, value2 := range value1 {
-						fmt.Println("Key:", key2)
+						fmt.Println(key, key1, key2)
 						for key3, value3 := range value2 {
 							 fmt.Println(key, "-", key1,"-",key2,"-",key3,": Nonce: ",value3.Nonce)
 						}
