@@ -48,7 +48,7 @@ func init() {
     max_connection := cfg.Webserver.MaxRpcConnection
     for i:=0 ; i<max_connection; i++ {
          for _,host := range cfg.Networks {
-              ethclient, err := utils.NewEthClient(host.WebSocket)
+              ethclient, err := utils.NewEthClient(host.Http)
               if err != nil {
                 continue
               }

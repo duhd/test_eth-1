@@ -42,7 +42,7 @@ type Transaction struct {
 
 func NewEthClient(url string) (*EthClient, error) {
     fmt.Println("Connect to host: ",url)
-    cl, err  := ethclient.Dial("ws://" + url)
+    cl, err  := ethclient.Dial("http://" + url)
     if err != nil {
        fmt.Println("Unable to connect to network:%v\n", err)
        return nil, err
