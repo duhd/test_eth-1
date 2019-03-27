@@ -218,14 +218,14 @@ func report(c *gin.Context){
   	for _, value:= range diff_arr {
   		total += value
   	}
-    len1 := int64(len(keys))
+    len2 := int64(len(keys))
     len := int64(len(diff_arr))
     var avg int64 = 0
     if len >0 {
       	avg = total/(len *1000)
     }
 
-    c.JSON(http.StatusOK, gin.H{"status": http.StatusOK,"Total Tx:",len1 , "Total Complete TX": len, "Avg RequestTime": avg1, "Avg Onchain": avg})
+    c.JSON(http.StatusOK, gin.H{"status": http.StatusOK,"Total Tx": len2 , "Total Complete TX": len, "Avg RequestTime": avg1, "Avg Onchain": avg})
 }
 func accounts(c *gin.Context){
     keys, err  := utils.Redis_client.Keys("account*").Result()
