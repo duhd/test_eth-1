@@ -46,7 +46,7 @@ func main() {
 }
 func listening_block_from_host(httpUrl string, socketUrl string ){
 		fmt.Println("Listening from: ", socketUrl)
-		websocket, err := ethclient.Dial("http://" + httpUrl)
+		websocket, err := ethclient.Dial("ws://" + socketUrl)
 		if err != nil {
 				log.Fatal("Cannot connect to websocket", err)
 				return
@@ -58,7 +58,7 @@ func listening_block_from_host(httpUrl string, socketUrl string ){
 		var current int = 0
 
 		for i:=0; i< max_client; i++ {
-			ethclient, err := utils.NewEthClient(socketUrl)
+			ethclient, err := utils.NewEthClient(httpUrl)
 			if err != nil {
 				log.Fatal("Cannot connect to: ",httpUrl," error:", err)
 				continue
