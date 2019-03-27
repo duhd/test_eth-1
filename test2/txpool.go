@@ -70,7 +70,7 @@ func main(){
 			for key1, value1 := range value {
 				//fmt.Println(key, key1)
 				for key2, value2 := range value1 {
-						nonce := strconv.ParseUint(key2, 10, 64)
+						nonce,_ := strconv.ParseUint(key2, 10, 64)
 						if min == 0 {
 							min = nonce
 						}else{
