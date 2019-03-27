@@ -6,6 +6,7 @@ import (
   "io/ioutil"
   "strings"
   "path/filepath"
+    "context"
   // "encoding/json"
   // "time"
   "github.com/go-redis/redis"
@@ -14,6 +15,8 @@ import (
   "github.com/ethereum/go-ethereum/accounts/keystore"
   "crypto/ecdsa"
    "sync/atomic"
+  "github.com/ethereum/go-ethereum/common"
+    "github.com/ethereum/go-ethereum/ethclient"
 )
 
 type WalletAccount struct {
@@ -36,6 +39,20 @@ func (w *WalletAccount) UpdateNonce(nonce uint64)  {
     fmt.Println("Update Nonce:",nonce)
     atomic.StoreUint64(&w.Nonce, nonce)
 }
+
+func SyncNonce(backend   *ethclient.Client){
+  for _,wallet := range Wallets {
+    keyAddr := common.HexToAddress(wallet.Address)
+    nonce, err := backend.PendingNonceAt(context.Background(), keyAddr)
+    if err != nil {
+      fmt.Errorf("failed to retrieve account nonce: %v", err)
+      nonce = 0 
+    }
+    fmt.Println("Nonce from eth: ",nonce)
+    wallet.UpdateNonce(nonce)
+  }
+}
+
 func GetWallet(addr string) *WalletAccount {
     for _, wallet := range Wallets {
        if wallet.Address == addr {

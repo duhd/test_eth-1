@@ -14,6 +14,7 @@ import (
         "encoding/json"
         "fmt"
         "test_eth/test2/utils"
+
 )
 
 var cfg *utils.Config
@@ -57,16 +58,8 @@ func init() {
      }
 
      //Sync nonce of account
-     backend := clients[0]
-     for wallet := range utils.Wallets {
-       keyAddr := common.HexToAddress(wallet.Address)
-       nonce, err = backend.PendingNonceAt(context.Background(), keyAddr)
-       if err != nil {
-         return "", fmt.Errorf("failed to retrieve account nonce: %v", err)
-       }
-       fmt.Println("Nonce from eth: ",nonce)
-       wallet.UpdateNonce(nonce)
-     }
+     utils.SyncNonce(clients[0].Client)
+
 }
 
 func main() {
