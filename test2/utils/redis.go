@@ -12,10 +12,38 @@ import (
   // "strconv"
   "github.com/ethereum/go-ethereum/crypto"
   "github.com/ethereum/go-ethereum/accounts/keystore"
+  "crypto/ecdsa"
+   "sync/atomic"
 )
 
+type WalletAccount struct {
+    Address string
+    Nonce uint64
+    PrivateKey *ecdsa.PrivateKey
+}
 
 var Redis_client *redis.Client
+var Wallets []*WalletAccount
+
+func (w *WalletAccount) GetNonce() uint64 {
+    nonce := atomic.LoadUint64(&w.Nonce)
+    fmt.Println("Get Nonce:",nonce)
+    atomic.AddUint64(&w.Nonce, 1)
+    return nonce
+}
+
+func (w *WalletAccount) UpdateNonce(nonce uint64)  {
+    fmt.Println("Update Nonce:",nonce)
+    atomic.StoreUint64(&w.Nonce, nonce)
+}
+func GetWallet(addr string) *WalletAccount {
+    for _, wallet := range Wallets {
+       if wallet.Address == addr {
+         return wallet
+       }
+    }
+    return nil
+}
 
 func DeleteData(pattern string){
   keys, err  := Redis_client.Keys(pattern).Result()
@@ -42,6 +70,7 @@ func LoadKeyStores(root string){
          fmt.Println("File:", file)
          list := strings.Split(file,"--")
          if len(list) == 3 {
+              //Store full account key
              account := "account:" + list[2]
              keyjson, err := ioutil.ReadFile(file)
              if err != nil {
@@ -54,6 +83,7 @@ func LoadKeyStores(root string){
                 panic(err)
               }
 
+              //Store account private key
               accountKey, err := keystore.DecryptKey( []byte(keyjson), cfg.Keys.Password)
               if err != nil {
                   fmt.Println("Cannot decrypt key file: ", err)
@@ -67,6 +97,13 @@ func LoadKeyStores(root string){
               if err != nil {
                  panic(err)
               }
+              //Add to array list
+              wallet := WalletAccount{
+                  Address: list[2],
+                  Nonce: uint64(0),
+                  PrivateKey: privateKey,
+              }
+              Wallets = append(Wallets,&wallet)
          }
     }
 }
