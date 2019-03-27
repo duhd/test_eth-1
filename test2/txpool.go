@@ -11,6 +11,7 @@ import (
 	// "test_eth/test2/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
+	// "github.com/ethereum/go-ethereum/internal/ethapi/api"
 	// "github.com/ethereum/go-ethereum/core/rawdb"
 	// "github.com/ethereum/go-ethereum/core/types"
 	// "github.com/ethereum/go-ethereum/core/vm"
@@ -49,17 +50,26 @@ func main(){
 		}
 	  server := os.Args[1]
 		ctx := context.Background()
-		method := "txpool_content"
+
+
 		client, err := rpc.DialContext(ctx, server)
 		if err != nil {
 			fmt.Println("Unable to connect to network:%v\n", err)
 		}
-		var result map[string]map[string]map[string][]*RPCTransaction
+
+		// method := "txpool_content"
+		// var result map[string]map[string]map[string][]*RPCTransaction
+		// client.CallContext(ctx, &result, method)
+		// fmt.Println("Result:",result)
+		// for key, value := range result {
+	  //   fmt.Println("Key:", key, "Value:", value)
+		// }
+
+		method := "txpool_inspect"
+		var result map[string]map[string]map[string][]string
 		client.CallContext(ctx, &result, method)
-
 		fmt.Println("Result:",result)
-
 		for key, value := range result {
-	    fmt.Println("Key:", key, "Value:", value)
+			fmt.Println("Key:", key, "Value:", value)
 		}
 }
