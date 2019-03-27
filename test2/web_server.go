@@ -124,25 +124,26 @@ func transfer(c *gin.Context){
     //fmt.Println("Transfer: ", current," from ",from," to ",to, " amount: ",amount, " note:",append)
     client := clients[current]
 
-    // go func() {
-    //     result, err := client.TransferToken(from,to,amount,append)
-    //     if err != nil {
-    //         fmt.Println("Error to transfer token: ", err)
-    //         return
-    //     }
-    //     fmt.Println("Transaction: ", result)
-    //   }()
+    go func() {
+        result, err := client.TransferToken(from,to,amount,append)
+        if err != nil {
+            fmt.Println("Error to transfer token: ", err)
+            return
+        }
+        fmt.Println("Transaction: ", result)
+      }()
 
 
-    result, err := client.TransferToken(from,to,amount,append)
-    if err != nil {
-          fmt.Println("Error to transfer token: ", err)
-          c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "error": err})
-          return
-    }
+    // result, err := client.TransferToken(from,to,amount,append)
+    // if err != nil {
+    //       fmt.Println("Error to transfer token: ", err)
+    //       c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "error": err})
+    //       return
+    // }
     current = current + 1
     current = current % len(clients)
-    c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "transaction": result})
+    //c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "transaction": result})
+    c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "transaction": "pending"})
 }
 // call transfer token
 func balance(c *gin.Context){
