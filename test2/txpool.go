@@ -65,20 +65,20 @@ func main(){
 		min := uint64(0)
 		//fmt.Println("Result:",result)
 		for key, value := range result {
-	    fmt.Println("Key:", key)
+	    //fmt.Println("Key:", key)
 			for key1, value1 := range value {
-				fmt.Println(key, key1)
+				//fmt.Println(key, key1)
 				for key2, value2 := range value1 {
-						fmt.Println(key, key1, key2,len(value2))
-						for key3, value3 := range value2 {
-						   nonce := strconv.ParseUint(key3, 10, 64)
-							 if min == 0 {
+						nonce := strconv.ParseUint(key3, 10, 64)
+						if min == 0 {
+							min = nonce
+						}else{
+							if nonce < min {
 								 min = nonce
-							 }else{
-								 if nonce < min {
-									  min = nonce 
-								 }
-							 }
+							}
+						}
+						fmt.Println(key, key1, key2, min, len(value2))
+						for key3, value3 := range value2 {
 							 fmt.Println(key, "-", key1,"-",key2,"-",key3,": Nonce: ",value3.Nonce)
 						}
 				}
