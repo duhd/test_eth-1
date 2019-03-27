@@ -61,6 +61,8 @@ func main(){
 		method := "txpool_content"
 		var result map[string]map[string]map[string][]*RPCTransaction
 		client.CallContext(ctx, &result, method)
+
+		min := uint64(0)
 		//fmt.Println("Result:",result)
 		for key, value := range result {
 	    fmt.Println("Key:", key)
@@ -69,6 +71,14 @@ func main(){
 				for key2, value2 := range value1 {
 						fmt.Println(key, key1, key2,len(value2))
 						for key3, value3 := range value2 {
+						   nonce := strconv.ParseUint(key3, 10, 64)
+							 if min == 0 {
+								 min = nonce
+							 }else{
+								 if nonce < min {
+									  min = nonce 
+								 }
+							 }
 							 fmt.Println(key, "-", key1,"-",key2,"-",key3,": Nonce: ",value3.Nonce)
 						}
 				}
