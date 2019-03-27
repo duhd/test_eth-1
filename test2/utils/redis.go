@@ -23,8 +23,11 @@ func DeleteData(pattern string){
     // handle error
     fmt.Println(" Cannot get keys ")
   }
-  res := Redis_client.Del(keys...)
-  fmt.Println("Redis delete: ", res)
+  if len(keys) >0 {
+    res := Redis_client.Del(keys...)
+    fmt.Println("Redis delete: ", res)
+  }
+
 }
 func LoadKeyStores(root string){
     var files []string
