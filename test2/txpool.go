@@ -4,7 +4,7 @@ import (
 	"os"
 	// "strings"
 	"context"
-	"log"
+	// "log"
 	"github.com/ethereum/go-ethereum/rpc"
 	// "github.com/ethereum/go-ethereum/p2p"
 	"fmt"
@@ -56,6 +56,8 @@ func main(){
 		}
 		var result map[string]map[string]map[string][]*RPCTransaction
 		client.CallContext(ctx, &result, method)
+
+		fmt.Println("Result:")
 
 		for key, value := range result {
 	    fmt.Println("Key:", key, "Value:", value)
