@@ -469,16 +469,6 @@ func (c *EthClient) TransferToken(from string,to string,amount string,append str
       //   return "", fmt.Errorf("failed to retrieve account nonce: %v", err)
       // }
       nonce := wallet.GetNonce()
-      if nonce == 0 {
-        keyAddr := common.HexToAddress(from)
-        nonce, err = backend.PendingNonceAt(context.Background(), keyAddr)
-        if err != nil {
-          return "", fmt.Errorf("failed to retrieve account nonce: %v", err)
-        }
-        fmt.Println("Nonce from eth: ",nonce)
-        wallet.UpdateNonce(nonce)
-      }
-
       gasPrice := new(big.Int)
       gasPrice, ok = gasPrice.SetString(cfg.Contract.GasPrice, 10)
       var gasLimit uint64 = cfg.Contract.GasLimit
