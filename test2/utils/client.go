@@ -606,7 +606,7 @@ func  (c *EthClient)  LogEnd(key string, nonce uint64){
       }
 
       diff := (TxConfirmedTime  - data.RequestTime )/1000000
-      fmt.Println("Finish transaction: ", key, " Processing time: ", diff)
+      fmt.Println("Finish transaction: ", key, " Processing time: ", diff, " nonce: ", data.TxNonce)
 }
 
 func  (c *EthClient)  GetNonce(account string) uint64 {
