@@ -4,6 +4,17 @@ import (
   "encoding/json"
   "time"
 )
+
+type Transaction struct {
+        Id                string  `json:"Id"`
+        CoinBase          string  `json:"Coinbase"`
+        TxNonce           uint64  `json:"TxNonce"`
+        RequestTime       int64   `json:"RequestTime"`
+        TxReceiveTime     int64   `json:"TxReceiveTime"`
+        TxConfirmedTime   []int64 `json:"TxConfiredTime"`
+   }
+
+
 func  LogStart(key string, nonce uint64, requesttime int64) bool {
   client := Rclients.getClient()
   trans :=  &Transaction{
@@ -24,7 +35,7 @@ func  LogStart(key string, nonce uint64, requesttime int64) bool {
   return true
 }
 
-func  LogEnd(key string, nonce uint64){
+func  LogEnd(key string, nonce uint64, coinbase string){
       client := Rclients.getClient()
       val, err2 := client.Get("transaction:" + key).Result()
       if err2 != nil {
@@ -39,6 +50,7 @@ func  LogEnd(key string, nonce uint64){
           return
       }
 
+      data.CoinBase = coinbase
       TxConfirmedTime := time.Now().UnixNano()
       data.TxConfirmedTime = append(data.TxConfirmedTime,TxConfirmedTime )
       value, err := json.Marshal(data)
@@ -49,12 +61,12 @@ func  LogEnd(key string, nonce uint64){
     	}
 
       if data.TxNonce != nonce {
-        fmt.Println(time.Now()," nonce:",data.TxNonce," tx:",key," request:",data.RequestTime," receive:", time_receive_ms, " error:",nonce)
+        fmt.Println(time.Now()," nonce:",data.TxNonce," tx:",key," request:",data.RequestTime," receive:", data.TxReceiveTime, " error:",nonce)
       }
 
-  time_receive_ms := (data.TxReceiveTime - data.RequestTime)/1000000
-  time_confirm_ms := (TxConfirmedTime  - data.RequestTime )/1000000
-  fmt.Println(time.Now()," nonce:",data.TxNonce," tx:",key," request:",data.RequestTime," receive:", time_receive_ms, " confirm:",time_confirm_ms)
+      time_receive_ms := (data.TxReceiveTime - data.RequestTime)/1000000
+      time_confirm_ms := (TxConfirmedTime  - data.RequestTime )/1000000
+      fmt.Println(time.Now()," nonce:",data.TxNonce," tx:",key," request:",data.RequestTime," receive:", time_receive_ms, " confirm:",time_confirm_ms)
 }
 
 func Report() string {

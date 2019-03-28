@@ -31,14 +31,6 @@ type EthClient struct {
 	mux sync.Mutex
 }
 
-type Transaction struct {
-        Id                string  `json:"Id"`
-        TxNonce           uint64   `json:"TxNonce"`
-        RequestTime       int64   `json:"RequestTime"`
-        TxReceiveTime     int64   `json:"TxReceiveTime"`
-        TxConfirmedTime    []int64 `json:"TxConfiredTime"`
-   }
-
 func NewEthClient(url string) (*EthClient, error) {
     fmt.Println("Connect to host: ",url)
     cl, err  := ethclient.Dial("http://" + url)
@@ -86,10 +78,12 @@ func (c *EthClient) UpdateReceipt(header *types.Header ){
         return
         //log.Fatal(err)
       }
+
+      coinbase := block.Coinbase()
       for _, transaction := range block.Transactions(){
            nonce := transaction.Nonce()
            key := strings.TrimPrefix(transaction.Hash().Hex(),"0x")
-           LogEnd(key,nonce)
+           LogEnd(key,nonce,coinbase.Hex())
       }
 }
 //
