@@ -18,7 +18,7 @@ func  LogStart(key string, nonce uint64, requesttime int64) bool {
   }
   err = client.Set("transaction:" + key,string(value), 0).Err()
   if err != nil {
-    fmt.Println("Write transaction to redis error: ", err)
+    fmt.Println(time.Now()," Write transaction to redis error: ", err)
     return false
   }
   return true
@@ -28,14 +28,14 @@ func  LogEnd(key string, nonce uint64){
       client := Rclients.getClient()
       val, err2 := client.Get("transaction:" + key).Result()
       if err2 != nil {
-          fmt.Println("Cannot find transaction: ", key)
+          fmt.Println(time.Now()," Cannot find transaction: ", key)
           return
       }
 
       data := &Transaction{}
       err := json.Unmarshal([]byte(val), data)
       if err != nil {
-          fmt.Println("Cannot parse data ", err)
+          fmt.Println(time.Now()," Cannot parse data ", err)
           return
       }
 
@@ -45,15 +45,16 @@ func  LogEnd(key string, nonce uint64){
 
       err = client.Set("transaction:" + key,string(value), 0).Err()
     	if err != nil {
-    	     fmt.Println("Cannot set data ", err)
+        fmt.Println(time.Now()," err: Cannot set data - ", err)
     	}
 
       if data.TxNonce != nonce {
-            fmt.Println("Error in Nonce:  transaction ", key, " Redis.Nonce: ", data.TxNonce," transaction: ", nonce)
+        fmt.Println(time.Now()," nonce:",data.TxNonce," tx:",key," request:",data.RequestTime," receive:", time_receive_ms, " error:",nonce)
       }
 
-      diff := (TxConfirmedTime  - data.RequestTime )/1000000
-      fmt.Println("Finish transaction: ", key, " Processing time: ", diff, " nonce: ", data.TxNonce)
+  time_receive_ms := (data.TxReceiveTime - data.RequestTime)/1000000
+  time_confirm_ms := (TxConfirmedTime  - data.RequestTime )/1000000
+  fmt.Println(time.Now()," nonce:",data.TxNonce," tx:",key," request:",data.RequestTime," receive:", time_receive_ms, " confirm:",time_confirm_ms)
 }
 
 func Report() string {
@@ -61,12 +62,12 @@ func Report() string {
       keys, err  := client.Keys("transaction:*").Result()
       if err != nil {
         // handle error
-        fmt.Println(" Cannot get keys ")
+        fmt.Println(time.Now()," Cannot get keys ")
       }
       vals, err1 := client.MGet(keys...).Result()
       if err1 != nil {
         // handle error
-        fmt.Println(" Cannot get values of  keys: ", keys)
+        fmt.Println(time.Now()," Cannot get values of  keys: ", keys)
       }
 
       fmt.Println("Elements: ", len(keys))
@@ -77,7 +78,7 @@ func Report() string {
           data := &Transaction{}
           err2 := json.Unmarshal([]byte(element.(string)), data)
           if err2 != nil {
-              fmt.Println("Element:", element, ", Error:", err2)
+              fmt.Println(time.Now()," Element:", element, ", Error:", err2)
               continue
           }
           fmt.Println("ID:",data.Id,"RequestTime:",data.RequestTime,
