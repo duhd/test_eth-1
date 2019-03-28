@@ -26,6 +26,7 @@ type Config struct {
 				LocalAddr string `yaml:"local"`
 		} `yaml:"networks"`
 		Redis struct {
+        MaxConn int  `yaml:"maxconn"`
 			  Host string `yaml:"host"`
 			  Password string `yaml:"password"`
 			  Db int `yaml:"db"`

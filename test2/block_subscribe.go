@@ -9,7 +9,7 @@ import (
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
   "test_eth/test2/utils"
-	"github.com/go-redis/redis"
+	// "github.com/go-redis/redis"
 	"sync"
 	"time"
 )
@@ -26,12 +26,8 @@ func main() {
 
 	 	cfg = utils.LoadConfig(config_file)
 
-		//Creat redis connection
-		utils.Redis_client = redis.NewClient(&redis.Options{
-			Addr:     cfg.Redis.Host,
-			Password: cfg.Redis.Password, // no password set
-			DB:       cfg.Redis.Db,  // use default DB
-		})
+		//Creat redis Poool
+		utils.NewRedisPool()
 
 		len := len(cfg.Networks)
 		wg.Add(len)

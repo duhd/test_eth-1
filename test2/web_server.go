@@ -9,18 +9,16 @@ import (
         "os"
         "strings"
        "github.com/gin-gonic/gin"
-       "github.com/go-redis/redis"
+       // "github.com/go-redis/redis"
         "net/http"
-        "encoding/json"
+        // "encoding/json"
         "fmt"
         "test_eth/test2/utils"
 
 )
 
 var cfg *utils.Config
-
-var clients []*utils.EthClient
-var current int = 0
+var clientPool *utils.ClientPool
 
 func init() {
   config_file := "config.yaml"
@@ -32,12 +30,8 @@ func init() {
    cfg = utils.LoadConfig(config_file)
 
    //Creat redis connection
-   println("Connect to redis")
-   utils.Redis_client = redis.NewClient(&redis.Options{
-     Addr:     cfg.Redis.Host,
-     Password: cfg.Redis.Password, // no password set
-     DB:       cfg.Redis.Db,  // use default DB
-   })
+   println("Initialize redis")
+   utils.NewRedisPool()
 
    println("Delete old data in redis ")
    //utils.DeleteData("transaction*")
@@ -49,20 +43,11 @@ func init() {
 
     //Load all wallets in hosts
     println("Create rpc connection pool ")
-    max_connection := cfg.Webserver.MaxRpcConnection
-    for i:=0 ; i<max_connection; i++ {
-         for _,host := range cfg.Networks {
-              ethclient, err := utils.NewEthClient(host.Http)
-              if err != nil {
-                continue
-              }
-              clients = append(clients,ethclient)
-            }
-     }
+    clientPool = utils.NewClientPool()
 
      //Sync nonce of account
      println("sync nonce of account from ethereum ")
-     utils.SyncNonce(clients[0].Client)
+     utils.SyncNonce(clientPool.GetClient().Client)
 }
 
 func main() {
@@ -129,7 +114,6 @@ func transfer(c *gin.Context){
     to = strings.TrimPrefix(to,"0x")
 
     //fmt.Println("Transfer: ", current," from ",from," to ",to, " amount: ",amount, " note:",append)
-    client := clients[current]
 
     // go func() {
     //     result, err := client.TransferToken(from,to,amount,append)
@@ -141,117 +125,50 @@ func transfer(c *gin.Context){
     //   }()
 
 
-    result, err := client.TransferToken(from,to,amount,append)
+    result, err := utils.TransferToken(from,to,amount,append)
     if err != nil {
           fmt.Println("Error to transfer token: ", err)
           c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "error": err})
           return
     }
-    current = current + 1
-    current = current % len(clients)
+
     c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "transaction": result})
     //c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "transaction": "pending"})
 }
+
 // call transfer token
 func balance(c *gin.Context){
     account := c.Param("p1")
     account = strings.TrimPrefix(account,"0x")
 
-    client := clients[current]
-    bal, err := client.BalaneOf(account)
-
+    bal, err := utils.BalaneOf(account)
     if err != nil {
         c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "error ": err})
         return
     }
     c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "balance": bal})
 }
+
 // call transfer token
 func report(c *gin.Context){
     fmt.Println("Start report")
-    keys, err  := utils.Redis_client.Keys("transaction:*").Result()
-    if err != nil {
-      // handle error
-      fmt.Println(" Cannot get keys ")
-    }
-    vals, err1 := utils.Redis_client.MGet(keys...).Result()
-    if err1 != nil {
-      // handle error
-      fmt.Println(" Cannot get values of  keys: ", keys)
-    }
+    report := utils.Report()
 
-    fmt.Println("Elements: ", len(keys))
-    diff_arr1 := []int64{}
-    diff_arr := []int64{}
-
-    for _, element := range vals {
-        data := &utils.Transaction{}
-        err2 := json.Unmarshal([]byte(element.(string)), data)
-        if err2 != nil {
-            fmt.Println("Element:", element, ", Error:", err2)
-            continue
-        }
-        fmt.Println("ID:",data.Id,"RequestTime:",data.RequestTime,
-          "TxReceiveTime:",data.TxReceiveTime,"TxConfirmedTime:",data.TxConfirmedTime)
-
-        var max int64 = 0
-        if data.TxConfirmedTime != nil {
-            for _,value := range data.TxConfirmedTime {
-                if value > max {
-                   max = value
-                }
-            }
-            diff1 := data.TxReceiveTime - data.RequestTime
-            diff_arr1 = append(diff_arr1,diff1)
-        }
-        // else {
-        //     max = time.Now().UnixNano()
-        // }
-        if max >0 {
-            diff := max  - data.TxReceiveTime
-            diff_arr = append(diff_arr,diff)
-        }
-    }
-    var total1 int64 = 0
-  	for _, value1:= range diff_arr1 {
-  		total1 += value1
-  	}
-    len1 := int64(len(diff_arr1))
-    var avg1 int64 = 0
-    if len1 >0 {
-      	avg1 = total1/(len1 *1000)
-    }
-
-    var total int64 = 0
-  	for _, value:= range diff_arr {
-  		total += value
-  	}
-    len2 := int64(len(keys))
-    len := int64(len(diff_arr))
-    var avg int64 = 0
-    if len >0 {
-      	avg = total/(len *1000)
-    }
-
-    c.JSON(http.StatusOK, gin.H{"status": http.StatusOK,"Total Tx": len2 , "Total Complete TX": len, "Avg RequestTime": avg1, "Avg Onchain": avg})
+    c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "data": report})
 }
 func accounts(c *gin.Context){
-    keys, err  := utils.Redis_client.Keys("account*").Result()
+    accounts, err := utils.GetAccountList()
     if err != nil {
-      // handle error
-      fmt.Println(" Cannot get keys ")
-    }
-    accounts := []string{}
-    for _, element := range keys {
-       account := strings.TrimPrefix(element,"account:")
-       accounts = append(accounts,account)
+        c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "error": err})
+        return
     }
     c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "accounts": accounts})
 }
 func getKey(c *gin.Context){
     account := c.Param("p1")
     account = strings.TrimPrefix(account,"0x")
-    val, err := utils.Redis_client.Get("account:"+account).Result()
+
+    val, err := utils.GetRedisAccountKey(account)
     if err != nil {
         c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "error": err})
         return

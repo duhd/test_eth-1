@@ -8,9 +8,9 @@ import (
   "context"
   "test_eth/contracts"
   "math/big"
-    "github.com/go-redis/redis"
-    "encoding/json"
-      "strconv"
+    // "github.com/go-redis/redis"
+    // "encoding/json"
+      // "strconv"
   // "github.com/ethereum/go-ethereum"
   // "github.com/ethereum/go-ethereum/accounts/keystore"
   "github.com/ethereum/go-ethereum/core/types"
@@ -28,7 +28,6 @@ import (
 // var sha hash.Hash
 type EthClient struct {
 	Client   *ethclient.Client
-  Redis    *redis.Client
 	mux sync.Mutex
 }
 
@@ -40,7 +39,6 @@ type Transaction struct {
         TxConfirmedTime    []int64 `json:"TxConfiredTime"`
    }
 
-
 func NewEthClient(url string) (*EthClient, error) {
     fmt.Println("Connect to host: ",url)
     cl, err  := ethclient.Dial("http://" + url)
@@ -48,14 +46,7 @@ func NewEthClient(url string) (*EthClient, error) {
        fmt.Println("Unable to connect to network:%v\n", err)
        return nil, err
     }
-
-    rd := redis.NewClient(&redis.Options{
-      Addr:     cfg.Redis.Host,
-      Password: cfg.Redis.Password, // no password set
-      DB:       cfg.Redis.Db,  // use default DB
-    })
-
-    return &EthClient{Client: cl, Redis: rd}, nil
+    return &EthClient{Client: cl}, nil
 }
 func (c *EthClient) BalaneOf(account string) (*big.Float,error) {
     	c.mux.Lock()
@@ -98,7 +89,7 @@ func (c *EthClient) UpdateReceipt(header *types.Header ){
       for _, transaction := range block.Transactions(){
            nonce := transaction.Nonce()
            key := strings.TrimPrefix(transaction.Hash().Hex(),"0x")
-           c.LogEnd(key,nonce)
+           LogEnd(key,nonce)
       }
 }
 //
@@ -420,6 +411,23 @@ func (c *EthClient) UpdateReceipt(header *types.Header ){
 //       return tx_hash, nil
 // }
 
+func (c *EthClient) TransferToken(signedTx *types.Transaction, nonce uint64) (string,error) {
+    	c.mux.Lock()
+      defer 	c.mux.Unlock()
+      if err := c.Client.SendTransaction(context.Background(), signedTx); err != nil {
+         fmt.Println("Send Transaction Nonce:", nonce ," error: ", err)
+         return "", err
+      }
+      return "Ok", nil
+}
+
+
+func BalaneOf(account string) (*big.Float,error) {
+  client := clientPool.GetClient()
+  return client.BalaneOf(account)
+}
+
+
 func PrepareTransferToken(from string,to string,amount string,append string)  (*types.Transaction, error,uint64)  {
       wallet := GetWallet(from)
 
@@ -478,146 +486,28 @@ func PrepareTransferToken(from string,to string,amount string,append string)  (*
       signedTx, err := rawTx.WithSignature(signer, signature)
       return  signedTx, err , nonce
 }
-func (c *EthClient) TransferToken(from string,to string,amount string,append string) (string,error) {
-    	c.mux.Lock()
-      defer 	c.mux.Unlock()
+func TransferToken(from string,to string,amount string,append string) (string,error) {
+  requestTime := time.Now().UnixNano()
+  signedTx, err, nonce := PrepareTransferToken(from,to,amount,append)
+  if err != nil {
+    fmt.Println("Create Transaction error: ", err)
+    return "", err
+  }
 
-      requestTime := time.Now().UnixNano()
-
-      signedTx, err, nonce := PrepareTransferToken(from,to,amount,append)
+  txhash := strings.TrimPrefix(signedTx.Hash().Hex(),"0x")
+  prepareTime := time.Now().UnixNano()
+  if LogStart(txhash, nonce, requestTime) {
+      client := clientPool.GetClient()
+      _, err := client.TransferToken(signedTx,nonce)
       if err != nil {
-        fmt.Println("Create Transaction error: ", err)
-        return "", err
+        return txhash, err
       }
-
-      tx_hash := strings.TrimPrefix(signedTx.Hash().Hex(),"0x")
-
-      prepareTime := time.Now().UnixNano()
-      if c.LogStart(tx_hash, nonce, requestTime) {
-         if err := c.Client.SendTransaction(context.Background(), signedTx); err != nil {
-            fmt.Println("Send Transaction Nonce:", nonce ," error: ", err)
-           return "", err
-         }
-      }
-      submitTime := time.Now().UnixNano()
-      diff0 := (prepareTime - requestTime)/1000
-      diff1 := (submitTime - prepareTime)/1000
-      fmt.Println("Transfer: ", nonce," from ",from," to ",to, " amount: ",amount, " note:",append)
-      fmt.Println("prepareTime, submitTime : ",diff0,diff1, " Transaction =",tx_hash)
-
-      return tx_hash, nil
-}
-func (c *EthClient) getNonce(account string) uint64 {
-     nonce := c.GetNonce(account)
-     if nonce == 0 {
-        nonce, _ = c.UpdateNoneFromEth(account)
-        c.CommitNonce(account,nonce)
-     }
-     c.NoneIncr(account)
-     return nonce
-}
-func (c *EthClient) UpdateNoneFromEth(account string) (uint64,error) {
-      keyjson, err := Redis_client.Get("account:"+account).Result()
-      if err != nil {
-          return 0, err
-      }
-
-      opts, err := bind.NewTransactor(strings.NewReader(keyjson),cfg.Keys.Password)
-      if err != nil {
-            fmt.Println("Failed to create authorized transactor: %v", err)
-            return 0, err
-      }
-      var nonce uint64
-      if opts.Nonce == nil {
-        nonce, err = c.Client.PendingNonceAt(context.Background(), opts.From)
-        if err != nil {
-          return 0, fmt.Errorf("failed to retrieve account nonce: %v", err)
-        }
-      } else {
-        nonce = opts.Nonce.Uint64()
-      }
-      if c.CommitNonce(account,nonce) {
-        fmt.Println("Failed to create authorized transactor: %v", err)
-      }
-      return nonce,nil
-}
-
-func  (c *EthClient) LogStart(key string, nonce uint64, requesttime int64) bool {
-  trans :=  &Transaction{
-              Id: key,
-              TxNonce: nonce,
-              RequestTime: requesttime,
-              TxReceiveTime: time.Now().UnixNano()}
-  value, err := json.Marshal(trans)
-  if err != nil {
-      fmt.Println(err)
-      return false
   }
-  err = c.Redis.Set("transaction:" + key,string(value), 0).Err()
-  if err != nil {
-    fmt.Println("Write transaction to redis error: ", err)
-    return false
-  }
-  return true
-}
+  submitTime := time.Now().UnixNano()
+  diff0 := (prepareTime - requestTime)/1000
+  diff1 := (submitTime - prepareTime)/1000
+  fmt.Println("Transfer: ", nonce," from ",from," to ",to, " amount: ",amount, " note:",append)
+  fmt.Println("prepareTime, submitTime : ",diff0,diff1, " Transaction =",txhash)
 
-func  (c *EthClient)  LogEnd(key string, nonce uint64){
-
-      val, err2 := c.Redis.Get("transaction:" + key).Result()
-      if err2 != nil {
-          fmt.Println("Cannot find transaction: ", key)
-          return
-      }
-      data := &Transaction{}
-      err := json.Unmarshal([]byte(val), data)
-      if err != nil {
-          fmt.Println("Cannot parse data ", err)
-          return
-      }
-
-      TxConfirmedTime := time.Now().UnixNano()
-      data.TxConfirmedTime = append(data.TxConfirmedTime,TxConfirmedTime )
-      value, err := json.Marshal(data)
-
-      err = c.Redis.Set("transaction:" + key,string(value), 0).Err()
-    	if err != nil {
-    	     fmt.Println("Cannot set data ", err)
-    	}
-
-      if data.TxNonce != nonce {
-            fmt.Println("Error in Nonce:  transaction ", key, " Redis.Nonce: ", data.TxNonce," transaction: ", nonce)
-      }
-
-      diff := (TxConfirmedTime  - data.RequestTime )/1000000
-      fmt.Println("Finish transaction: ", key, " Processing time: ", diff, " nonce: ", data.TxNonce)
-}
-
-func  (c *EthClient)  GetNonce(account string) uint64 {
-  val, err := c.Redis.Get("nonce:" + account).Result()
-  if err != nil {
-      fmt.Println("Cannot find nonce of account: ", account)
-      return uint64(0)
-  }
-  value , err := strconv.ParseUint(val, 10, 64)
-  if err != nil {
-      fmt.Println("Cannot parce nonce of ", val)
-      return uint64(0)
-  }
-  return value
-}
-func   (c *EthClient)  CommitNonce(account string, nonce uint64) bool {
-  err := c.Redis.Set("nonce:" + account,uint64(nonce), 0).Err()
-  if err != nil {
-       fmt.Println("Cannot set nonce  ", err)
-       return false
-  }
-  return true
-}
-func  (c *EthClient)  NoneIncr(account string) bool {
-  _, err := c.Redis.Incr("nonce:" + account).Result()
-	if err != nil {
-    fmt.Println("Cannot increase nonce  ", err)
-    return false
-	}
-  return true
+  return txhash, err
 }
