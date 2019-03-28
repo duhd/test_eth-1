@@ -94,6 +94,10 @@ func processCall(c *routing.Context) error {
            fmt.Println("call key")
            getKey(c)
            return nil
+			 case "test":
+           fmt.Println("call test")
+           fmt.Fprintf(c, "data=test")
+           return nil
    }
 
    fmt.Fprintf(c, "URL not found ")

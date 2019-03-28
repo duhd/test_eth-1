@@ -47,7 +47,6 @@ func init() {
    println("Load key in account array ")
    utils.LoadKeyStores(cfg.Keys.Keystore)
 
-
     //Load all wallets in hosts
     println("Create rpc connection pool ")
     max_connection := cfg.Webserver.MaxRpcConnection
@@ -64,7 +63,6 @@ func init() {
      //Sync nonce of account
      println("sync nonce of account from ethereum ")
      utils.SyncNonce(clients[0].Client)
-
 }
 
 func main() {
@@ -103,6 +101,10 @@ func processCall(c *gin.Context){
            fmt.Println("call key")
            getKey(c)
            return
+       case "test":
+             fmt.Println("call test")
+             c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "data": "test"})
+             return
    }
   c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "data": "not find"})
 }
