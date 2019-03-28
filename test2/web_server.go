@@ -32,20 +32,24 @@ func init() {
    cfg = utils.LoadConfig(config_file)
 
    //Creat redis connection
+   println("Connect to redis")
    utils.Redis_client = redis.NewClient(&redis.Options{
      Addr:     cfg.Redis.Host,
      Password: cfg.Redis.Password, // no password set
      DB:       cfg.Redis.Db,  // use default DB
    })
 
-   utils.DeleteData("transaction*")
-   utils.DeleteData("nonce*")
+   println("Delete old data in redis ")
+   //utils.DeleteData("transaction*")
+   //utils.DeleteData("nonce*")
 
    // sha = sha1.New()
+   println("Load key in account array ")
    utils.LoadKeyStores(cfg.Keys.Keystore)
 
 
     //Load all wallets in hosts
+    println("Create rpc connection pool ")
     max_connection := cfg.Webserver.MaxRpcConnection
     for i:=0 ; i<max_connection; i++ {
          for _,host := range cfg.Networks {
@@ -58,6 +62,7 @@ func init() {
      }
 
      //Sync nonce of account
+     println("sync nonce of account from ethereum ")
      utils.SyncNonce(clients[0].Client)
 
 }
