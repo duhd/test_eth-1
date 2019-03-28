@@ -420,107 +420,90 @@ func (c *EthClient) UpdateReceipt(header *types.Header ){
 //       return tx_hash, nil
 // }
 
-func (c *EthClient) TransferToken(from string,to string,amount string,append string) (string,error) {
-    	c.mux.Lock()
-      defer 	c.mux.Unlock()
-
-      requestTime := time.Now().UnixNano()
-
+func PrepareTransferToken(from string,to string,amount string,append string)  (*types.Transaction, error,uint64)  {
       wallet := GetWallet(from)
 
       if wallet == nil {
-        return "",errors.New("Cannot load wallet")
+        return nil,errors.New("Cannot load wallet"),0
       }
-
-      redisTime := time.Now().UnixNano()
-
       privateKey := wallet.PrivateKey
-
-      decryptTime := time.Now().UnixNano()
 
       to_address := common.HexToAddress(to)
       value_transfer := new(big.Int)
       value_transfer, ok := value_transfer.SetString(amount, 10)
       if !ok {
            fmt.Println("SetString: error")
-           return "", errors.New("convert amount error")
+           return nil, errors.New("convert amount error"),0
       }
       note :=  fmt.Sprintf("Transaction:  %s", append)
 
-      prepareAccountTime := time.Now().UnixNano()
-
       contract_address := common.HexToAddress(cfg.Contract.Address)
-      backend := c.Client
 
       //Get contract
       parsed, err := abi.JSON(strings.NewReader(contracts.VNDWalletABI))
       if err != nil {
           fmt.Println("Error in parse contract ABI: ", contracts.VNDWalletABI)
-          return "", err
+          return nil, err,0
       }
 
       input, err := parsed.Pack("transfer", to_address, value_transfer, []byte(note))
-    	if err != nil {
+      if err != nil {
         fmt.Println("Error in pack function in ABI: ", contracts.VNDWalletABI)
-    		return "", err
-    	}
+        return nil, err,0
+      }
 
       // Ensure a valid value field and resolve the account nonce
       value := new(big.Int)
 
-      prepareContractTime := time.Now().UnixNano()
-
-      //keyAddr := crypto.PubkeyToAddress(key.PrivateKey.PublicKey)
-      // keyAddr := common.HexToAddress(from)
-      // nonce, err := backend.PendingNonceAt(context.Background(), keyAddr)
-      // if err != nil {
-      //   return "", fmt.Errorf("failed to retrieve account nonce: %v", err)
-      // }
       nonce := wallet.GetNonce()
       gasPrice := new(big.Int)
       gasPrice, ok = gasPrice.SetString(cfg.Contract.GasPrice, 10)
       var gasLimit uint64 = cfg.Contract.GasLimit
 
-      nonceTime := time.Now().UnixNano()
 
-    	// Create the transaction, sign it and schedule it for execution
-    	var rawTx *types.Transaction
+      // Create the transaction, sign it and schedule it for execution
+      var rawTx *types.Transaction
       rawTx = types.NewTransaction(nonce, contract_address, value, gasLimit, gasPrice, input)
 
-    	//signedTx, err := auth.Signer(types.HomesteadSigner{}, keyAddr, rawTx)
+      //signedTx, err := auth.Signer(types.HomesteadSigner{}, keyAddr, rawTx)
 
       signer := types.HomesteadSigner{}
 
       signature, err := crypto.Sign(signer.Hash(rawTx).Bytes(), privateKey)
       if err != nil {
         fmt.Println(" Cannot sign contract: ", err)
+        return nil,err,0
+      }
+
+      signedTx, err := rawTx.WithSignature(signer, signature)
+      return  signedTx, err , nonce
+}
+func (c *EthClient) TransferToken(from string,to string,amount string,append string) (string,error) {
+    	c.mux.Lock()
+      defer 	c.mux.Unlock()
+
+      requestTime := time.Now().UnixNano()
+
+      signedTx, err, nonce := PrepareTransferToken(from,to,amount,append)
+      if err != nil {
+        fmt.Println("Create Transaction error: ", err)
         return "", err
       }
-      signedTx, err := rawTx.WithSignature(signer, signature)
-
-    	if err != nil {
-        fmt.Println("Create Transaction error: ", err)
-    		return "", err
-    	}
 
       tx_hash := strings.TrimPrefix(signedTx.Hash().Hex(),"0x")
 
-      signTime := time.Now().UnixNano()
+      prepareTime := time.Now().UnixNano()
       if c.LogStart(tx_hash, nonce, requestTime) {
-         if err := backend.SendTransaction(context.Background(), signedTx); err != nil {
+         if err := c.Client.SendTransaction(context.Background(), signedTx); err != nil {
             fmt.Println("Send Transaction Nonce:", nonce ," error: ", err)
            return "", err
          }
       }
-      diff0 := (redisTime - requestTime)/1000
-      diff01 := (decryptTime - redisTime)/1000
-      diff1 := (prepareAccountTime - decryptTime)/1000
-      diff2 := (prepareContractTime - prepareAccountTime)/1000
-      diff3 := (nonceTime - prepareContractTime)/1000
-      diff4 := (signTime - nonceTime)/1000
-      diff5 := (time.Now().UnixNano() - signTime)/1000
+      submitTime := time.Now().UnixNano()
+      diff0 := (prepareTime - requestTime)/1000
+      diff1 := (submitTime - prepareTime)/1000
       fmt.Println("Transfer: ", nonce," from ",from," to ",to, " amount: ",amount, " note:",append)
-      fmt.Println("redisTime, decryptTime, prepareAccountTime,prepareContractTime, nonceTime,signTime, trasactionTime : ",diff0,diff01, diff1,diff2,diff3,diff4,diff5, " Transaction =",tx_hash)
+      fmt.Println("prepareTime, submitTime : ",diff0,diff1, " Transaction =",tx_hash)
 
       return tx_hash, nil
 }
