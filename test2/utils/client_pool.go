@@ -122,16 +122,18 @@ func TransferToken(from string,to string,amount string,append string) (string,er
 
   txhash := strings.TrimPrefix(signedTx.Hash().Hex(),"0x")
   prepareTime := time.Now().UnixNano()
-  stored := LogStart(txhash, nonce, requestTime)
+  //stored := LogStart(txhash, nonce, requestTime)
 
   redisTime := time.Now().UnixNano()
-  client := clientPool.GetClient()
-  if stored {
-      _, err := client.TransferToken(signedTx,nonce)
-      if err != nil {
-        return txhash, err
-      }
-  }
+  // client := clientPool.GetClient()
+  //
+  // stored := true
+  // if stored {
+  //     _, err := client.TransferToken(signedTx,nonce)
+  //     if err != nil {
+  //       return txhash, err
+  //     }
+  // }
   submitTime := time.Now().UnixNano()
   diff0 := (prepareTime - requestTime)/1000
   diff1 := (redisTime - prepareTime)/1000

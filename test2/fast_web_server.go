@@ -98,7 +98,6 @@ func processCall(c *routing.Context) error {
 
  // call transfer token
  func transfer(c *routing.Context){
-
      from := c.Param("p1")
      to := c.Param("p2")
      amount := c.Param("p3")
@@ -155,7 +154,7 @@ func processCall(c *routing.Context) error {
  func getKey(c *routing.Context){
      account := c.Param("p1")
      account = strings.TrimPrefix(account,"0x")
-		 
+
 		 val, err := utils.GetRedisAccountKey(account)
      if err != nil {
          fmt.Fprintf(c,"error:",err)
