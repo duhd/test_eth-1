@@ -123,7 +123,7 @@ func transfer(c *gin.Context){
 
     //fmt.Println("Transfer: ", current," from ",from," to ",to, " amount: ",amount, " note:",append)
     client := clients[current]
-    
+
     // go func() {
     //     result, err := client.TransferToken(from,to,amount,append)
     //     if err != nil {
@@ -142,8 +142,8 @@ func transfer(c *gin.Context){
     }
     current = current + 1
     current = current % len(clients)
-    //c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "transaction": result})
-    c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "transaction": "pending"})
+    c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "transaction": result})
+    //c.JSON(http.StatusOK, gin.H{"status": http.StatusOK, "transaction": "pending"})
 }
 // call transfer token
 func balance(c *gin.Context){
