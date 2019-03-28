@@ -11,7 +11,7 @@ import (
   // "time"
   "github.com/go-redis/redis"
   // "strconv"
-  "github.com/ethereum/go-ethereum/crypto"
+  // "github.com/ethereum/go-ethereum/crypto"
   "github.com/ethereum/go-ethereum/accounts/keystore"
   "crypto/ecdsa"
    "sync/atomic"
@@ -87,18 +87,18 @@ func LoadKeyStores(root string){
          list := strings.Split(file,"--")
          if len(list) == 3 {
               //Store full account key
-             account := "account:" + list[2]
+             //account := "account:" + list[2]
              keyjson, err := ioutil.ReadFile(file)
              if err != nil {
                   fmt.Println("Error in read file: ", file )
                   continue
              }
-             //Set key in redis
-              err = Redis_client.Set(account,string(keyjson), 0).Err()
-              if err != nil {
-                panic(err)
-              }
-
+             // //Set key in redis
+             //  err = Redis_client.Set(account,string(keyjson), 0).Err()
+             //  if err != nil {
+             //    panic(err)
+             //  }
+             //
               //Store account private key
               accountKey, err := keystore.DecryptKey( []byte(keyjson), cfg.Keys.Password)
               if err != nil {
@@ -107,12 +107,12 @@ func LoadKeyStores(root string){
               }
               privateKey := accountKey.PrivateKey
 
-              private := "private:" + list[2]
-              //Set key in redis
-              err = Redis_client.Set(private,string(crypto.FromECDSA(privateKey)), 0).Err()
-              if err != nil {
-                 panic(err)
-              }
+             //  private := "private:" + list[2]
+             //  //Set key in redis
+             //  err = Redis_client.Set(private,string(crypto.FromECDSA(privateKey)), 0).Err()
+             //  if err != nil {
+             //     panic(err)
+             //  }
               //Add to array list
               wallet := WalletAccount{
                   Address: list[2],
