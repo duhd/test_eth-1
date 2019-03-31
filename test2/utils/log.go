@@ -1,4 +1,5 @@
 package utils
+
 import (
   "fmt"
   "encoding/json"
@@ -14,26 +15,6 @@ type Transaction struct {
         TxConfirmedTime   []int64 `json:"TxConfiredTime"`
    }
 
-
-func  LogStart(key string, nonce uint64, requesttime int64) bool {
-  client := Rclients.getClient()
-  trans :=  &Transaction{
-              Id: key,
-              TxNonce: nonce,
-              RequestTime: requesttime,
-              TxReceiveTime: time.Now().UnixNano()}
-  value, err := json.Marshal(trans)
-  if err != nil {
-      fmt.Println(err)
-      return false
-  }
-  err = client.Set("transaction:" + key,string(value), 0).Err()
-  if err != nil {
-    fmt.Println(time.Now()," Write transaction to redis error: ", err)
-    return false
-  }
-  return true
-}
 
 func  LogEnd(key string, nonce uint64, coinbase string){
       client := Rclients.getClient()

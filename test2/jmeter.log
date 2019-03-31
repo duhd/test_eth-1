@@ -1,75 +1,113 @@
-2019-03-28 09:12:25,971 INFO o.a.j.u.JMeterUtils: Setting Locale to en_EN
-2019-03-28 09:12:26,006 INFO o.a.j.JMeter: Loading user properties from: /usr/local/Cellar/jmeter/5.0/libexec/bin/user.properties
-2019-03-28 09:12:26,006 INFO o.a.j.JMeter: Loading system properties from: /usr/local/Cellar/jmeter/5.0/libexec/bin/system.properties
-2019-03-28 09:12:26,013 INFO o.a.j.JMeter: Copyright (c) 1998-2018 The Apache Software Foundation
-2019-03-28 09:12:26,013 INFO o.a.j.JMeter: Version 5.0 r1840935
-2019-03-28 09:12:26,013 INFO o.a.j.JMeter: java.version=1.8.0_191
-2019-03-28 09:12:26,013 INFO o.a.j.JMeter: java.vm.name=Java HotSpot(TM) 64-Bit Server VM
-2019-03-28 09:12:26,013 INFO o.a.j.JMeter: os.name=Mac OS X
-2019-03-28 09:12:26,013 INFO o.a.j.JMeter: os.arch=x86_64
-2019-03-28 09:12:26,014 INFO o.a.j.JMeter: os.version=10.14.3
-2019-03-28 09:12:26,014 INFO o.a.j.JMeter: file.encoding=UTF-8
-2019-03-28 09:12:26,014 INFO o.a.j.JMeter: Max memory     =1073741824
-2019-03-28 09:12:26,014 INFO o.a.j.JMeter: Available Processors =8
-2019-03-28 09:12:26,020 INFO o.a.j.JMeter: Default Locale=English (EN)
-2019-03-28 09:12:26,021 INFO o.a.j.JMeter: JMeter  Locale=English (EN)
-2019-03-28 09:12:26,021 INFO o.a.j.JMeter: JMeterHome=/usr/local/Cellar/jmeter/5.0/libexec
-2019-03-28 09:12:26,021 INFO o.a.j.JMeter: user.dir  =/Users/nguyenthanhbinh/Blockchain/test/ethereum/golang/src/test_eth/test2
-2019-03-28 09:12:26,021 INFO o.a.j.JMeter: PWD       =/Users/nguyenthanhbinh/Blockchain/test/ethereum/golang/src/test_eth/test2
-2019-03-28 09:12:26,059 INFO o.a.j.JMeter: IP: 10.10.0.78 Name: NGUYENs-MacBook-Pro.local FullName: 10.10.0.78
-2019-03-28 09:12:28,375 INFO o.a.j.g.a.LookAndFeelCommand: Installing Darcula LAF
-2019-03-28 09:12:28,397 INFO o.a.j.g.a.LookAndFeelCommand: Using look and feel: com.bulenkov.darcula.DarculaLaf [Darcula]
-2019-03-28 09:12:28,397 INFO o.a.j.JMeter: Setting LAF to: com.bulenkov.darcula.DarculaLaf
-2019-03-28 09:12:28,492 INFO o.a.j.JMeter: Loaded icon properties from org/apache/jmeter/images/icon.properties
-2019-03-28 09:12:29,528 INFO o.a.j.e.u.CompoundVariable: Note: Function class names must contain the string: '.functions.'
-2019-03-28 09:12:29,528 INFO o.a.j.e.u.CompoundVariable: Note: Function class names must not contain the string: '.gui.'
-2019-03-28 09:12:30,803 INFO k.a.j.JMeterPluginsUtils: JMeter-Plugins.org v.1.4.0
-2019-03-28 09:12:31,351 WARN o.a.j.g.u.MenuFactory: Configuration error, probably corrupt or missing third party library(jar)? Could not create class: kg.apc.jmeter.reporters.LoadosophiaUploaderGui.
-java.lang.NoClassDefFoundError: org/apache/commons/httpclient/methods/multipart/PartSource
-	at kg.apc.jmeter.reporters.LoadosophiaUploaderGui.init(LoadosophiaUploaderGui.java:114) ~[JMeterPlugins-Standard.jar:?]
-	at kg.apc.jmeter.reporters.LoadosophiaUploaderGui.<init>(LoadosophiaUploaderGui.java:28) ~[JMeterPlugins-Standard.jar:?]
-	at sun.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method) ~[?:1.8.0_191]
-	at sun.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62) ~[?:1.8.0_191]
-	at sun.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45) ~[?:1.8.0_191]
-	at java.lang.reflect.Constructor.newInstance(Constructor.java:423) ~[?:1.8.0_191]
-	at java.lang.Class.newInstance(Class.java:442) ~[?:1.8.0_191]
-	at org.apache.jmeter.gui.util.MenuFactory.getGUIComponent(MenuFactory.java:174) ~[ApacheJMeter_core.jar:5.0 r1840935]
-	at org.apache.jmeter.gui.util.MenuFactory.initializeMenus(MenuFactory.java:141) ~[ApacheJMeter_core.jar:5.0 r1840935]
-	at org.apache.jmeter.gui.util.MenuFactory.<clinit>(MenuFactory.java:106) ~[ApacheJMeter_core.jar:5.0 r1840935]
-	at org.apache.jmeter.control.gui.TestPlanGui.createPopupMenu(TestPlanGui.java:92) ~[ApacheJMeter_core.jar:5.0 r1840935]
-	at org.apache.jmeter.gui.tree.JMeterTreeNode.createPopupMenu(JMeterTreeNode.java:184) ~[ApacheJMeter_core.jar:5.0 r1840935]
-	at org.apache.jmeter.gui.action.EditCommand.doAction(EditCommand.java:46) ~[ApacheJMeter_core.jar:5.0 r1840935]
-	at org.apache.jmeter.gui.action.ActionRouter.performAction(ActionRouter.java:88) ~[ApacheJMeter_core.jar:5.0 r1840935]
-	at org.apache.jmeter.gui.action.ActionRouter.lambda$actionPerformed$0(ActionRouter.java:70) ~[ApacheJMeter_core.jar:5.0 r1840935]
-	at java.awt.event.InvocationEvent.dispatch(InvocationEvent.java:311) [?:1.8.0_191]
-	at java.awt.EventQueue.dispatchEventImpl(EventQueue.java:758) [?:1.8.0_191]
-	at java.awt.EventQueue.access$500(EventQueue.java:97) [?:1.8.0_191]
-	at java.awt.EventQueue$3.run(EventQueue.java:709) [?:1.8.0_191]
-	at java.awt.EventQueue$3.run(EventQueue.java:703) [?:1.8.0_191]
-	at java.security.AccessController.doPrivileged(Native Method) [?:1.8.0_191]
-	at java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:74) [?:1.8.0_191]
-	at java.awt.EventQueue.dispatchEvent(EventQueue.java:728) [?:1.8.0_191]
-	at java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:205) [?:1.8.0_191]
-	at java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:116) [?:1.8.0_191]
-	at java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:105) [?:1.8.0_191]
-	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:101) [?:1.8.0_191]
-	at java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:93) [?:1.8.0_191]
-	at java.awt.EventDispatchThread.run(EventDispatchThread.java:82) [?:1.8.0_191]
-Caused by: java.lang.ClassNotFoundException: org.apache.commons.httpclient.methods.multipart.PartSource
-	at java.net.URLClassLoader.findClass(URLClassLoader.java:382) ~[?:1.8.0_191]
-	at java.lang.ClassLoader.loadClass(ClassLoader.java:424) ~[?:1.8.0_191]
-	at java.lang.ClassLoader.loadClass(ClassLoader.java:357) ~[?:1.8.0_191]
-	... 29 more
-2019-03-28 09:12:31,979 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/html is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
-2019-03-28 09:12:31,979 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for application/xhtml+xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
-2019-03-28 09:12:31,979 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for application/xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
-2019-03-28 09:12:31,979 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
-2019-03-28 09:12:31,980 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/vnd.wap.wml is org.apache.jmeter.protocol.http.parser.RegexpHTMLParser
-2019-03-28 09:12:31,980 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/css is org.apache.jmeter.protocol.http.parser.CssParser
-2019-03-28 09:12:32,322 INFO o.a.j.e.KeyToolUtils: keytool found at 'keytool'
-2019-03-28 09:12:32,323 INFO o.a.j.p.h.p.ProxyControl: HTTP(S) Test Script Recorder SSL Proxy will use keys that support embedded 3rd party resources in file /usr/local/Cellar/jmeter/5.0/libexec/bin/proxyserver.jks
-2019-03-28 09:12:32,527 INFO o.a.j.s.FileServer: Default base='/Users/nguyenthanhbinh/Blockchain/test/ethereum/golang/src/test_eth/test2'
-2019-03-28 09:12:32,826 INFO o.a.j.s.SampleResult: Note: Sample TimeStamps are START times
-2019-03-28 09:12:32,826 INFO o.a.j.s.SampleResult: sampleresult.default.encoding is set to ISO-8859-1
-2019-03-28 09:12:32,827 INFO o.a.j.s.SampleResult: sampleresult.useNanoTime=true
-2019-03-28 09:12:32,827 INFO o.a.j.s.SampleResult: sampleresult.nanoThreadSleep=5000
+2019-03-31 07:14:35,988 INFO o.a.j.u.JMeterUtils: Setting Locale to en_EN
+2019-03-31 07:14:36,011 INFO o.a.j.JMeter: Loading user properties from: /usr/local/Cellar/jmeter/5.0/libexec/bin/user.properties
+2019-03-31 07:14:36,011 INFO o.a.j.JMeter: Loading system properties from: /usr/local/Cellar/jmeter/5.0/libexec/bin/system.properties
+2019-03-31 07:14:36,017 INFO o.a.j.JMeter: Copyright (c) 1998-2018 The Apache Software Foundation
+2019-03-31 07:14:36,017 INFO o.a.j.JMeter: Version 5.0 r1840935
+2019-03-31 07:14:36,017 INFO o.a.j.JMeter: java.version=1.8.0_191
+2019-03-31 07:14:36,017 INFO o.a.j.JMeter: java.vm.name=Java HotSpot(TM) 64-Bit Server VM
+2019-03-31 07:14:36,017 INFO o.a.j.JMeter: os.name=Mac OS X
+2019-03-31 07:14:36,017 INFO o.a.j.JMeter: os.arch=x86_64
+2019-03-31 07:14:36,017 INFO o.a.j.JMeter: os.version=10.14.3
+2019-03-31 07:14:36,017 INFO o.a.j.JMeter: file.encoding=UTF-8
+2019-03-31 07:14:36,017 INFO o.a.j.JMeter: Max memory     =1073741824
+2019-03-31 07:14:36,018 INFO o.a.j.JMeter: Available Processors =8
+2019-03-31 07:14:36,022 INFO o.a.j.JMeter: Default Locale=English (EN)
+2019-03-31 07:14:36,022 INFO o.a.j.JMeter: JMeter  Locale=English (EN)
+2019-03-31 07:14:36,022 INFO o.a.j.JMeter: JMeterHome=/usr/local/Cellar/jmeter/5.0/libexec
+2019-03-31 07:14:36,022 INFO o.a.j.JMeter: user.dir  =/Users/nguyenthanhbinh/Blockchain/test/ethereum/golang/src/test_eth/test2
+2019-03-31 07:14:36,022 INFO o.a.j.JMeter: PWD       =/Users/nguyenthanhbinh/Blockchain/test/ethereum/golang/src/test_eth/test2
+2019-03-31 07:14:36,060 INFO o.a.j.JMeter: IP: 192.168.45.103 Name: NGUYENs-MacBook-Pro.local FullName: 192.168.45.103
+2019-03-31 07:14:36,063 INFO o.a.j.s.FileServer: Default base='/Users/nguyenthanhbinh/Blockchain/test/ethereum/golang/src/test_eth/test2'
+2019-03-31 07:14:36,070 INFO o.a.j.s.FileServer: Set new base='/Users/nguyenthanhbinh/Blockchain/test/ethereum/golang/src/test_eth/test2'
+2019-03-31 07:14:36,197 INFO o.a.j.s.SaveService: Testplan (JMX) version: 2.2. Testlog (JTL) version: 2.2
+2019-03-31 07:14:36,215 INFO o.a.j.s.SaveService: Using SaveService properties file encoding UTF-8
+2019-03-31 07:14:36,220 INFO o.a.j.s.SaveService: Using SaveService properties version 5.0
+2019-03-31 07:14:36,226 INFO o.a.j.s.SaveService: Loading file: jmeter_transfer.jmx
+2019-03-31 07:14:36,273 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/html is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2019-03-31 07:14:36,273 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for application/xhtml+xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2019-03-31 07:14:36,274 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for application/xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2019-03-31 07:14:36,274 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/xml is org.apache.jmeter.protocol.http.parser.LagartoBasedHtmlParser
+2019-03-31 07:14:36,274 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/vnd.wap.wml is org.apache.jmeter.protocol.http.parser.RegexpHTMLParser
+2019-03-31 07:14:36,274 INFO o.a.j.p.h.s.HTTPSamplerBase: Parser for text/css is org.apache.jmeter.protocol.http.parser.CssParser
+2019-03-31 07:14:36,281 INFO o.a.j.JMeter: Creating summariser <summary>
+2019-03-31 07:14:36,291 INFO o.a.j.e.StandardJMeterEngine: Running the test!
+2019-03-31 07:14:36,291 INFO o.a.j.s.SampleEvent: List of sample_variables: []
+2019-03-31 07:14:36,291 INFO o.a.j.s.SampleEvent: List of sample_variables: []
+2019-03-31 07:14:36,296 INFO o.a.j.e.u.CompoundVariable: Note: Function class names must contain the string: '.functions.'
+2019-03-31 07:14:36,296 INFO o.a.j.e.u.CompoundVariable: Note: Function class names must not contain the string: '.gui.'
+2019-03-31 07:14:36,645 INFO o.a.j.JMeter: Running test (1553991276645)
+2019-03-31 07:14:36,672 INFO o.a.j.e.StandardJMeterEngine: Starting ThreadGroup: 1 : Thread Group
+2019-03-31 07:14:36,672 INFO o.a.j.e.StandardJMeterEngine: Starting 50 threads for group Thread Group.
+2019-03-31 07:14:36,672 INFO o.a.j.e.StandardJMeterEngine: Thread will continue on error
+2019-03-31 07:14:36,672 INFO o.a.j.t.ThreadGroup: Starting thread group... number=1 threads=50 ramp-up=1 perThread=20.0 delayedStart=false
+2019-03-31 07:14:36,678 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-1
+2019-03-31 07:14:36,691 INFO o.a.j.t.ThreadGroup: Started thread group number 1
+2019-03-31 07:14:36,691 INFO o.a.j.e.StandardJMeterEngine: All thread groups have been started
+2019-03-31 07:14:36,697 INFO o.a.j.p.h.s.HTTPHCAbstractImpl: Local host = NGUYENs-MacBook-Pro.local
+2019-03-31 07:14:36,699 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-2
+2019-03-31 07:14:36,703 INFO o.a.j.p.h.s.HTTPHC4Impl: HTTP request retry count = 0
+2019-03-31 07:14:36,705 INFO o.a.j.s.SampleResult: Note: Sample TimeStamps are START times
+2019-03-31 07:14:36,705 INFO o.a.j.s.SampleResult: sampleresult.default.encoding is set to ISO-8859-1
+2019-03-31 07:14:36,705 INFO o.a.j.s.SampleResult: sampleresult.useNanoTime=true
+2019-03-31 07:14:36,705 INFO o.a.j.s.SampleResult: sampleresult.nanoThreadSleep=5000
+2019-03-31 07:14:36,718 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-3
+2019-03-31 07:14:36,741 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-4
+2019-03-31 07:14:36,763 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-5
+2019-03-31 07:14:36,779 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-6
+2019-03-31 07:14:36,800 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-7
+2019-03-31 07:14:36,822 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-8
+2019-03-31 07:14:36,835 INFO o.a.j.u.JsseSSLManager: Using default SSL protocol: TLS
+2019-03-31 07:14:36,835 INFO o.a.j.u.JsseSSLManager: SSL session context: per-thread
+2019-03-31 07:14:36,842 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-9
+2019-03-31 07:14:36,862 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-10
+2019-03-31 07:14:36,884 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-11
+2019-03-31 07:14:36,902 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-12
+2019-03-31 07:14:36,923 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-13
+2019-03-31 07:14:36,941 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-14
+2019-03-31 07:14:36,965 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-15
+2019-03-31 07:14:36,985 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-16
+2019-03-31 07:14:37,004 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-17
+2019-03-31 07:14:37,023 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-18
+2019-03-31 07:14:37,047 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-19
+2019-03-31 07:14:37,063 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-20
+2019-03-31 07:14:37,083 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-21
+2019-03-31 07:14:37,104 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-22
+2019-03-31 07:14:37,124 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-23
+2019-03-31 07:14:37,145 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-24
+2019-03-31 07:14:37,164 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-25
+2019-03-31 07:14:37,185 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-26
+2019-03-31 07:14:37,205 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-27
+2019-03-31 07:14:37,230 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-28
+2019-03-31 07:14:37,246 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-29
+2019-03-31 07:14:37,268 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-30
+2019-03-31 07:14:37,286 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-31
+2019-03-31 07:14:37,310 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-32
+2019-03-31 07:14:37,332 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-33
+2019-03-31 07:14:37,347 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-34
+2019-03-31 07:14:37,367 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-35
+2019-03-31 07:14:37,388 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-36
+2019-03-31 07:14:37,412 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-37
+2019-03-31 07:14:37,430 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-38
+2019-03-31 07:14:37,449 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-39
+2019-03-31 07:14:37,472 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-40
+2019-03-31 07:14:37,493 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-41
+2019-03-31 07:14:37,512 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-42
+2019-03-31 07:14:37,530 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-43
+2019-03-31 07:14:37,549 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-44
+2019-03-31 07:14:37,569 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-45
+2019-03-31 07:14:37,593 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-46
+2019-03-31 07:14:37,612 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-47
+2019-03-31 07:14:37,630 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-48
+2019-03-31 07:14:37,650 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-49
+2019-03-31 07:14:37,673 INFO o.a.j.t.JMeterThread: Thread started: Thread Group 1-50
+2019-03-31 07:15:00,070 INFO o.a.j.r.Summariser: summary +  15020 in 00:00:23 =  641.2/s Avg:    67 Min:     1 Max:  6500 Err:   127 (0.85%) Active: 50 Started: 50 Finished: 0
+2019-03-31 07:15:30,942 INFO o.a.j.r.Summariser: summary +  16435 in 00:00:31 =  532.4/s Avg:    96 Min:     1 Max:  3304 Err:  1597 (9.72%) Active: 50 Started: 50 Finished: 0
+2019-03-31 07:15:30,942 INFO o.a.j.r.Summariser: summary =  31455 in 00:00:54 =  579.3/s Avg:    82 Min:     1 Max:  6500 Err:  1724 (5.48%)
+2019-03-31 07:16:00,105 INFO o.a.j.r.Summariser: summary +   9230 in 00:00:29 =  316.5/s Avg:   164 Min:     0 Max:  8488 Err:  2522 (27.32%) Active: 50 Started: 50 Finished: 0
+2019-03-31 07:16:00,106 INFO o.a.j.r.Summariser: summary =  40685 in 00:01:23 =  487.5/s Avg:   101 Min:     0 Max:  8488 Err:  4246 (10.44%)
+2019-03-31 07:16:30,033 INFO o.a.j.r.Summariser: summary +  13452 in 00:00:30 =  449.5/s Avg:   108 Min:     1 Max:  2249 Err:  2751 (20.45%) Active: 50 Started: 50 Finished: 0
+2019-03-31 07:16:30,033 INFO o.a.j.r.Summariser: summary =  54137 in 00:01:53 =  477.5/s Avg:   102 Min:     0 Max:  8488 Err:  6997 (12.92%)
+2019-03-31 07:17:01,031 INFO o.a.j.r.Summariser: summary +  16977 in 00:00:31 =  547.7/s Avg:    91 Min:     1 Max:  2699 Err:  2300 (13.55%) Active: 50 Started: 50 Finished: 0
+2019-03-31 07:17:01,031 INFO o.a.j.r.Summariser: summary =  71114 in 00:02:24 =  492.5/s Avg:   100 Min:     0 Max:  8488 Err:  9297 (13.07%)
+2019-03-31 07:17:14,999 INFO o.a.j.r.ResultCollector: Shutdown hook started
+2019-03-31 07:17:15,000 INFO o.a.j.r.ResultCollector: Shutdown hook ended

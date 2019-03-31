@@ -14,43 +14,71 @@ import (
         // "encoding/json"
         "fmt"
         "test_eth/test2/utils"
+        "sync"
 
 )
 
 var cfg *utils.Config
-var clientPool *utils.ClientPool
 
 func init() {
-  config_file := "config.yaml"
-  if len(os.Args) == 2 {
-      config_file = os.Args[1]
-   }
+   config_file := "config.yaml"
+   if len(os.Args) == 2 {
+       config_file = os.Args[1]
+    }
 
-   println("init function")
-   cfg = utils.LoadConfig(config_file)
-
-   //Creat redis connection
-   println("Initialize redis")
-   utils.NewRedisPool()
-
-   println("Delete old data in redis ")
-   //utils.DeleteData("transaction*")
-   //utils.DeleteData("nonce*")
-
-   // sha = sha1.New()
-   println("Load key in account array ")
-   utils.LoadKeyStores(cfg.Keys.Keystore)
-
-    //Load all wallets in hosts
-    println("Create rpc connection pool ")
-    clientPool = utils.NewClientPool()
-
-     //Sync nonce of account
-     println("sync nonce of account from ethereum ")
-     utils.SyncNonce(clientPool.GetClient().Client)
+    println("init function")
+    cfg = utils.LoadConfig(config_file)
 }
 
 func main() {
+  //Creat redis connection
+	println("Initialize redis")
+	redisPool := utils.NewRedisPool()
+
+	println("Delete old data in redis ")
+	//utils.DeleteData("transaction*")
+	//utils.DeleteData("nonce*")
+
+	// sha = sha1.New()
+	println("Load key in account array ")
+	utils.LoadKeyStores(cfg.Keys.Keystore)
+
+	 //Load all wallets in hosts
+	 println("Create rpc connection pool ")
+	 clientPool := utils.NewClientPool()
+
+	 //Sync nonce of account
+	 println("sync nonce of account from ethereum ")
+	 utils.SyncNonce(clientPool.GetClient().Client)
+
+
+	 var wg sync.WaitGroup
+	 wg.Add(3)
+
+	 go func (){
+		   println("Loop processs sending message ")
+		   defer wg.Done()
+			 clientPool.Loop()
+	 }()
+
+	 go func (){
+		 	  println("Loop webservice ")
+			  defer wg.Done()
+				redisPool.Loop()
+	 }()
+
+	 go func (){
+			 println("Loop webservice ")
+			defer wg.Done()
+			httpServer()
+	 }()
+
+
+
+	 wg.Wait()
+	 fmt.Println("Finished webserver")
+}
+func httpServer(){
   router := gin.Default()
   // Simple group: v1
   v1 := router.Group("/api/v1")
@@ -61,7 +89,6 @@ func main() {
    }
    router.Run(":"+ cfg.Webserver.Port)
 }
-
 // createTodo add a new todo
 func processCall(c *gin.Context){
   method := c.Param("method")

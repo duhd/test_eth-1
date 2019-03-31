@@ -9,12 +9,11 @@ import (
   // "github.com/go-redis/redis"
   // "encoding/json"
   "test_eth/test2/utils"
+	"sync"
 )
 
 
 var cfg *utils.Config
-
-var clientPool *utils.ClientPool
 
 func init() {
   config_file := "config.yaml"
@@ -24,41 +23,68 @@ func init() {
 
    println("init function")
    cfg = utils.LoadConfig(config_file)
-
-
-	 //Creat redis connection
-   println("Initialize redis")
-   utils.NewRedisPool()
-
-   println("Delete old data in redis ")
-   //utils.DeleteData("transaction*")
-   //utils.DeleteData("nonce*")
-
-   // sha = sha1.New()
-   println("Load key in account array ")
-   utils.LoadKeyStores(cfg.Keys.Keystore)
-
-    //Load all wallets in hosts
-    println("Create rpc connection pool ")
-    clientPool = utils.NewClientPool()
-
-		//Sync nonce of account
-		println("sync nonce of account from ethereum ")
-		utils.SyncNonce(clientPool.GetClient().Client)
-
 }
 
 func main() {
+	//Creat redis connection
+	println("Initialize redis")
+	redisPool := utils.NewRedisPool()
+
+	println("Delete old data in redis ")
+	//utils.DeleteData("transaction*")
+	//utils.DeleteData("nonce*")
+
+	// sha = sha1.New()
+	println("Load key in account array ")
+	utils.LoadKeyStores(cfg.Keys.Keystore)
+
+	 //Load all wallets in hosts
+	 println("Create rpc connection pool ")
+	 clientPool := utils.NewClientPool()
+
+	 //Sync nonce of account
+	 println("sync nonce of account from ethereum ")
+	 utils.SyncNonce(clientPool.GetClient().Client)
+
+
+	 var wg sync.WaitGroup
+	 wg.Add(2)
+
+	 go func (){
+		   println("Loop processs sending message ")
+		   defer wg.Done()
+			 clientPool.Loop()
+	 }()
+
+	 go func (){
+		 	  println("Loop webservice ")
+			  defer wg.Done()
+				redisPool.Loop()
+	 }()
+
+	 go func (){
+			 println("Loop webservice ")
+			defer wg.Done()
+			httpServer()
+	 }()
+
+
+
+	 wg.Wait()
+	 fmt.Println("Finished webserver")
+}
+
+func httpServer(){
 	router := routing.New()
-  api := router.Group("/api/v1/wallet")
+	api := router.Group("/api/v1/wallet")
 
 	api.Get("/<method>/<p1>/<p2>/<p3>/<p4>", processCall)
-  api.Get("/<method>/<p1>/<p2>/<p3>", processCall)
-  api.Get("/<method>/<p1>/<p2>", processCall)
-  api.Get("/<method>/<p1>", processCall)
-  api.Get("/<method>", processCall)
+	api.Get("/<method>/<p1>/<p2>/<p3>", processCall)
+	api.Get("/<method>/<p1>/<p2>", processCall)
+	api.Get("/<method>/<p1>", processCall)
+	api.Get("/<method>", processCall)
 
-  fmt.Println("Start listening")
+	fmt.Println("Start listening")
 	panic(fasthttp.ListenAndServe(":"+ cfg.Webserver.Port, router.HandleRequest))
 }
 // createTodo add a new todo
@@ -116,7 +142,6 @@ func processCall(c *routing.Context) error {
 
   	 result, err := utils.TransferToken(from,to,amount,append)
      if err != nil {
-           fmt.Println("Error to transfer token: ", err)
            fmt.Fprintf(c,"Error to transfer token: ", err)
            return
      }
@@ -151,6 +176,7 @@ func processCall(c *routing.Context) error {
      }
     fmt.Fprintf(c,"accounts",accounts )
  }
+
  func getKey(c *routing.Context){
      account := c.Param("p1")
      account = strings.TrimPrefix(account,"0x")
