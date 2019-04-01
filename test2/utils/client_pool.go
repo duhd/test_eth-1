@@ -43,24 +43,6 @@ func NewClientPool()  *ClientPool{
      return clientPool
 }
 
-func (cp *ClientPool) GetClient() (*EthClient) {
-    if cp.Current >=  len(cp.Clients) {
-        cp.Current = cp.Current % len(cp.Clients)
-    }
-    client := cp.Clients[cp.Current]
-    cp.Current = cp.Current + 1
-    return client
-}
-
-func (cp *ClientPool) TransferToken(signedTx *types.Transaction, nonce uint64){
-//  fmt.Println("Send Transaction to channel")
-  tx := &TxTransaction{
-    Data: signedTx,
-    Nonce: nonce,
-  }
-  cp.TxCh <-tx
-}
-
 func (cp *ClientPool) Process(){
   for {
       select {
@@ -80,4 +62,21 @@ func (cp *ClientPool) Process(){
               }()
             }
     }
+}
+func (cp *ClientPool) GetClient() (*EthClient) {
+    if cp.Current >=  len(cp.Clients) {
+        cp.Current = cp.Current % len(cp.Clients)
+    }
+    client := cp.Clients[cp.Current]
+    cp.Current = cp.Current + 1
+    return client
+}
+
+func (cp *ClientPool) TransferToken(signedTx *types.Transaction, nonce uint64){
+//  fmt.Println("Send Transaction to channel")
+  tx := &TxTransaction{
+    Data: signedTx,
+    Nonce: nonce,
+  }
+  cp.TxCh <-tx
 }

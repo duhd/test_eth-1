@@ -35,24 +35,6 @@ func NewRedisPool() *RedisPool{
    }
    return Rclients
 }
-func (rp *RedisPool) getClient() *redis.Client {
-  if rp.Current >= len(rp.Clients) {
-      rp.Current =  rp.Current % len(rp.Clients)
-  }
-  client := rp.Clients[rp.Current]
-  rp.Current = rp.Current + 1
-
-  return client
-}
-func (rp *RedisPool) LogStart(key string, nonce uint64, requesttime int64) bool {
-    trans :=  &Transaction{
-                Id: key,
-                TxNonce: nonce,
-                RequestTime: requesttime,
-                TxReceiveTime: time.Now().UnixNano()}
-    rp.TxCh <- trans
-    return true
-}
 func (rp *RedisPool) Process() {
   for {
       select {
@@ -72,4 +54,24 @@ func (rp *RedisPool) Process() {
 
         }
     }
+}
+
+
+func (rp *RedisPool) getClient() *redis.Client {
+  if rp.Current >= len(rp.Clients) {
+      rp.Current =  rp.Current % len(rp.Clients)
+  }
+  client := rp.Clients[rp.Current]
+  rp.Current = rp.Current + 1
+
+  return client
+}
+func (rp *RedisPool) LogStart(key string, nonce uint64, requesttime int64) bool {
+    trans :=  &Transaction{
+                Id: key,
+                TxNonce: nonce,
+                RequestTime: requesttime,
+                TxReceiveTime: time.Now().UnixNano()}
+    rp.TxCh <- trans
+    return true
 }
