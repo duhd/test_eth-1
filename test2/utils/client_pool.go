@@ -34,7 +34,7 @@ func NewClientPool()  *ClientPool{
               clients = append(clients,ethclient)
             }
      }
-     txCh := make(chan *TxTransaction,100)
+     txCh := make(chan *TxTransaction,cfg.Channel.TransferQueue)
      clientPool =  &ClientPool{
         Clients: clients,
         Current: 0,

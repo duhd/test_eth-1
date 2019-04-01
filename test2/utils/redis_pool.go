@@ -27,7 +27,7 @@ func NewRedisPool() *RedisPool{
         })
        clients = append(clients,cl)
    }
-   txCh := make(chan *Transaction,100)
+   txCh := make(chan *Transaction,cfg.Channel.LogQueue)
    Rclients =  &RedisPool{
         Clients:clients,
         Current:0,

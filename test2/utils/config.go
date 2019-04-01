@@ -10,6 +10,10 @@ import (
 )
 
 type Config struct {
+    Channel struct {
+        TransferQueue int `yaml:"transferqueue"`
+        LogQueue int `yaml:"logqueue"`
+    } `yaml:"channel"`
     Webserver struct {
 			  Port string `yaml:"port"`
         MaxRpcConnection int `yaml:"maxrpc"`

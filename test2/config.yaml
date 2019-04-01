@@ -1,3 +1,6 @@
+channel:
+  transferqueue: 100
+  logqueue: 100
 webserver:
   port: "8080"
   maxrpc: 10
