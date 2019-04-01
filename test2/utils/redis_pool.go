@@ -53,7 +53,7 @@ func (rp *RedisPool) LogStart(key string, nonce uint64, requesttime int64) bool 
     rp.TxCh <- trans
     return true
 }
-func (rp *RedisPool) Loop() {
+func (rp *RedisPool) LoopProcess() {
   for {
       select {
             case  tx:= <- rp.TxCh:
