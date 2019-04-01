@@ -59,15 +59,15 @@ func (rp *RedisPool) Loop() {
             case  tx:= <- rp.TxCh:
               go func() {
                 fmt.Println("Write transation:",tx.Id, " to redis")
-                // client := Rclients.getClient()
-                // value, err := json.Marshal(tx)
-                // if err != nil {
-                //     fmt.Println(err)
-                // }
-                // err = client.Set("transaction:" + tx.Id,string(value), 0).Err()
-                // if err != nil {
-                //   fmt.Println(time.Now()," Write transaction to redis error: ", err)
-                // }
+                client := Rclients.getClient()
+                value, err := json.Marshal(tx)
+                if err != nil {
+                    fmt.Println(err)
+                }
+                err = client.Set("transaction:" + tx.Id,string(value), 0).Err()
+                if err != nil {
+                  fmt.Println(time.Now()," Write transaction to redis error: ", err)
+                }
               }()
 
         }
