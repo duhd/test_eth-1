@@ -14,6 +14,8 @@ import (
 
 
 var cfg *utils.Config
+var clientPool *utils.ClientPool
+var redisPool *utils.RedisPool
 
 func init() {
   config_file := "config.yaml"
@@ -28,7 +30,7 @@ func init() {
 func main() {
 	//Creat redis connection
 	println("Initialize redis")
-	redisPool := utils.NewRedisPool()
+	redisPool = utils.NewRedisPool()
 
 	println("Delete old data in redis ")
 	//utils.DeleteData("transaction*")
@@ -40,7 +42,7 @@ func main() {
 
 	 //Load all wallets in hosts
 	 println("Create rpc connection pool ")
-	 clientPool := utils.NewClientPool()
+	 clientPool = utils.NewClientPool()
 
 	 //Sync nonce of account
 	 println("sync nonce of account from ethereum ")
@@ -48,7 +50,7 @@ func main() {
 
 
 	 var wg sync.WaitGroup
-	 wg.Add(2)
+	 wg.Add(3)
 
 	 go func (){
 		   println("Loop processs sending message ")
@@ -67,8 +69,6 @@ func main() {
 			defer wg.Done()
 			httpServer()
 	 }()
-
-
 
 	 wg.Wait()
 	 fmt.Println("Finished webserver")
