@@ -55,13 +55,13 @@ func main() {
 	 go func (){
 		   println("Loop processs sending message ")
 		   defer wg.Done()
-			 clientPool.LoopProcess()
+			 clientPool.Process()
 	 }()
 
 	 go func (){
 		 	  println("Loop webservice ")
 			  defer wg.Done()
-				redisPool.LoopProcess()
+				redisPool.Process()
 	 }()
 
 	 go func (){

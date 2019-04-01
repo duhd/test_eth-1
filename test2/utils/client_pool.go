@@ -61,7 +61,7 @@ func (cp *ClientPool) TransferToken(signedTx *types.Transaction, nonce uint64){
   cp.TxCh <-tx
 }
 
-func (cp *ClientPool) LoopProcess(){
+func (cp *ClientPool) Process(){
   for {
       select {
             case  tx:= <- cp.TxCh:
