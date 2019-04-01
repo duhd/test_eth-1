@@ -2,7 +2,7 @@ package utils
 
 import (
   "time"
-  "test_eth/contracts"
+  "github.com/vnpayew/test_eth/contracts"
   "math/big"
   "github.com/ethereum/go-ethereum/core/types"
   "github.com/ethereum/go-ethereum/accounts/abi"

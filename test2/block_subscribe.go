@@ -8,7 +8,7 @@ import (
 	"log"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
-  "test_eth/test2/utils"
+  "github.com/vnpayew/test_eth/test2/utils"
 	// "github.com/go-redis/redis"
 	"sync"
 	"time"

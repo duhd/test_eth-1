@@ -13,7 +13,7 @@ import (
         "net/http"
         // "encoding/json"
         "fmt"
-        "test_eth/test2/utils"
+        "github.com/vnpayew/test_eth/test2/utils"
         "sync"
 
 )
