@@ -2,16 +2,17 @@
 package utils
 
 import (
-  "strings"
-  "context"
-  "github.com/vnpayew/test_eth/contracts"
-  "math/big"
-  "github.com/ethereum/go-ethereum/core/types"
-  "github.com/ethereum/go-ethereum/ethclient"
-  "github.com/ethereum/go-ethereum/accounts/abi/bind"
-  "github.com/ethereum/go-ethereum/common"
-  "sync"
-  "fmt"
+    "strings"
+    "context"
+    "github.com/vnpayew/test_eth/contracts"
+    "math/big"
+    "github.com/ethereum/go-ethereum/core/types"
+    "github.com/ethereum/go-ethereum/ethclient"
+    "github.com/ethereum/go-ethereum/accounts/abi/bind"
+    "github.com/ethereum/go-ethereum/common"
+    "sync"
+    "fmt"
+    "time"
 )
 
 // var sha hash.Hash
@@ -67,7 +68,8 @@ func (c *EthClient) UpdateReceipt(header *types.Header ){
         return
         //log.Fatal(err)
       }
-
+      t := time.Now()
+      fmt.Println(t.Format(time.RFC822),"Block Number: ", header.Number.String(),"number of transactions:", len(block.Transactions()), " header hash: " , header.Hash().Hex())
       coinbase := block.Coinbase()
       for _, transaction := range block.Transactions(){
            nonce := transaction.Nonce()

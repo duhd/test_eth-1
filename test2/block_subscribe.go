@@ -11,7 +11,7 @@ import (
   "github.com/vnpayew/test_eth/test2/utils"
 	// "github.com/go-redis/redis"
 	"sync"
-	"time"
+	// "time"
 )
 
 var cfg *utils.Config
@@ -75,8 +75,8 @@ func listening_block_from_host(httpUrl string, socketUrl string ){
 										fmt.Println("Error from: ",socketUrl," Error: ",err)
 										log.Fatal(err)
 								case header := <-headers:
-										t := time.Now()
-										fmt.Println(t.Format(time.RFC822),"Block Number: ", header.Number.String(), " header hash: " , header.Hash().Hex())
+										// t := time.Now()
+										//fmt.Println(t.Format(time.RFC822),"Block Number: ", header.Number.String(), " header hash: " , header.Hash().Hex())
 										client := clients[current]
 										go func(){
 												client.UpdateReceipt(header)

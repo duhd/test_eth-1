@@ -17,6 +17,7 @@ var Rclients *RedisPool
 
 func NewRedisPool() *RedisPool{
   max_connection := cfg.Redis.MaxConn
+
   clients := []*redis.Client{}
   for i:=0 ; i<max_connection; i++ {
         //Creat redis connection
@@ -58,9 +59,11 @@ func (rp *RedisPool) Process() {
 
 
 func (rp *RedisPool) getClient() *redis.Client {
-  if rp.Current >= len(rp.Clients) {
-      rp.Current =  rp.Current % len(rp.Clients)
+  len := len(rp.Clients)
+  if rp.Current >= len {
+      rp.Current =  rp.Current % len
   }
+  fmt.Println("Current Redis connect: ",rp.Current," in ",len)
   client := rp.Clients[rp.Current]
   rp.Current = rp.Current + 1
 
