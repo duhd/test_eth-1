@@ -58,13 +58,13 @@ func main() {
 	 go func (){
 		   println("Loop processs sending message ")
 		   defer wg.Done()
-			 clientPool.Loop()
+			 clientPool.Process()
 	 }()
 
 	 go func (){
 		 	  println("Loop webservice ")
 			  defer wg.Done()
-				redisPool.Loop()
+				redisPool.Process()
 	 }()
 
 	 go func (){

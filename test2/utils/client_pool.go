@@ -79,7 +79,7 @@ func (cp *ClientPool) GetClient() (*EthClient) {
 }
 
 func (cp *ClientPool) TransferToken(signedTx *types.Transaction, nonce uint64){
-//  fmt.Println("Send Transaction to channel")
+  fmt.Println("Send Transaction to channel")
   tx := &TxTransaction{
     Data: signedTx,
     Nonce: nonce,
