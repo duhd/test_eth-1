@@ -4,7 +4,7 @@ package utils
 import (
     "strings"
     "context"
-    "github.com/vnpayew/test_eth/contracts"
+    "test_eth/contracts"
     "math/big"
     "github.com/ethereum/go-ethereum/core/types"
     "github.com/ethereum/go-ethereum/ethclient"
