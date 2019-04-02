@@ -4,6 +4,7 @@ import (
   "time"
   "github.com/ethereum/go-ethereum/core/types"
   "fmt"
+  "sync"
 )
 
 
@@ -16,6 +17,7 @@ type ClientPool struct {
   Clients []*EthClient
   Current int
   TxCh chan *TxTransaction
+  mutex sync.Mutex
 }
 
 
@@ -64,8 +66,12 @@ func (cp *ClientPool) Process(){
     }
 }
 func (cp *ClientPool) GetClient() (*EthClient) {
-    if cp.Current >=  len(cp.Clients) {
-        cp.Current = cp.Current % len(cp.Clients)
+    cp.mutex.Lock()
+    defer cp.mutex.Unlock()
+
+    len := len(cp.Clients)
+    if cp.Current >=  len {
+        cp.Current = cp.Current % len
     }
     client := cp.Clients[cp.Current]
     cp.Current = cp.Current + 1

@@ -5,12 +5,14 @@ import (
   "fmt"
     "encoding/json"
   "time"
+  "sync"
 )
 
 type RedisPool struct {
    Clients []*redis.Client
    Current int
    TxCh chan *Transaction
+   mutex sync.Mutex
 }
 
 var Rclients *RedisPool
@@ -59,6 +61,9 @@ func (rp *RedisPool) Process() {
 
 
 func (rp *RedisPool) getClient() *redis.Client {
+  rp.mutex.Lock()
+  defer rp.mutex.Unlock()
+
   len := len(rp.Clients)
   if rp.Current >= len {
       rp.Current =  rp.Current % len
