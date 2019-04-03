@@ -18,6 +18,7 @@ type Config struct {
 			  Port string `yaml:"port"`
         MaxRpcConnection int `yaml:"maxrpc"`
         MaxListenRpcConnection int `yaml:"maxlistenrpc"`
+        Mode int `yaml:"mode"`
 		} `yaml:"webserver"`
 		Keys  struct {
 			  Keystore string `yaml:"keystore"`

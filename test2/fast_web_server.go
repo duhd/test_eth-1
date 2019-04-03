@@ -50,22 +50,29 @@ func main() {
 
 
 	 var wg sync.WaitGroup
-	 wg.Add(3)
 
-	 go func (){
-		   println("Loop processs sending message ")
-		   defer wg.Done()
-			 clientPool.Process()
-	 }()
+	 if cfg.Webserver.Mode >1 {
+		  wg.Add(3)
+	 }else{
+		  wg.Add(2)
+	 }
 
+	 if cfg.Webserver.Mode >1 {
+		     fmt.Println("Client pool run in message mode")
+				 go func (){
+					   println("Loop clientPool ")
+					   defer wg.Done()
+						 clientPool.Process()
+				 }()
+ 	 }
 	 go func (){
-		 	  println("Loop webservice ")
+		 	  println("Loop redisPool ")
 			  defer wg.Done()
 				redisPool.Process()
 	 }()
 
 	 go func (){
-			 println("Loop webservice ")
+			 println("Loop httpServer ")
 			defer wg.Done()
 			httpServer()
 	 }()

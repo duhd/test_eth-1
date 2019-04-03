@@ -5,6 +5,7 @@ webserver:
   port: "8080"
   maxrpc: 10
   maxlistenrpc: 1
+  mode: 1
 keys:
   keystore: ./keystore
   password: "123456"
@@ -25,8 +26,8 @@ redis:
 contract:
   gasprice: 1100
   gaslimit: 41000
-  owner: 0xffbcd481c1330e180879b4d2b9b50642eea43c02
+  owner: ffbcd481c1330e180879b4d2b9b50642eea43c02
   initialToken: 100000000000000
-  masterkey1: 0xbea868edea1c167aab5a0eef99496e2a690f3fae
-  masterkey2: 0x0e18db9aeea79d71b4c91c8375f1ef7fd0aaa594
-  address: 0xD6bac5623134884c69276FD9F192802173616801
+  masterkey1: bea868edea1c167aab5a0eef99496e2a690f3fae
+  masterkey2: 0e18db9aeea79d71b4c91c8375f1ef7fd0aaa594
+  address: D6bac5623134884c69276FD9F192802173616801

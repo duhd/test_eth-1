@@ -74,7 +74,7 @@ func (c *EthClient) UpdateReceipt(header *types.Header ){
       for _, transaction := range block.Transactions(){
            nonce := transaction.Nonce()
            key := strings.TrimPrefix(transaction.Hash().Hex(),"0x")
-           LogEnd(key,nonce,coinbase.Hex())
+           Rclients.LogEnd(key,nonce,coinbase.Hex())
       }
 }
 //

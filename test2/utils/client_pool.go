@@ -50,7 +50,7 @@ func (cp *ClientPool) Process(){
       select {
             case  tx:= <- cp.TxCh:
                go func() {
-                  fmt.Println("Get Transaction from channel")
+                  fmt.Println("Get Transaction Message from channel")
                    start := time.Now().UnixNano()
                    client := cp.GetClient()
                   // fmt.Println("Submit Transaction to geth")
@@ -78,11 +78,28 @@ func (cp *ClientPool) GetClient() (*EthClient) {
     return client
 }
 
-func (cp *ClientPool) TransferToken(signedTx *types.Transaction, nonce uint64){
-  fmt.Println("Send Transaction to channel")
-  tx := &TxTransaction{
-    Data: signedTx,
-    Nonce: nonce,
-  }
-  cp.TxCh <-tx
+
+func (cp *ClientPool) TransferToken(signedTx *types.Transaction, nonce uint64) (error) {
+   	if cfg.Webserver.Mode >1 {
+          fmt.Println("Send Transaction to channel via message channel")
+          tx := &TxTransaction{
+            Data: signedTx,
+            Nonce: nonce,
+          }
+          cp.TxCh <-tx
+    } else {
+          fmt.Println("Submit Transaction directly to miner ")
+          start := time.Now().UnixNano()
+          client := cp.GetClient()
+          _, err :=  client.TransferToken(signedTx, nonce)
+          if err != nil {
+              fmt.Println("Error send transaction", nonce," error:", err)
+              return err
+          }
+          end := time.Now().UnixNano()
+          diff:= (end-start)/1000
+          fmt.Println("End Submit transaction: ", nonce,", Time: ", diff)
+
+    }
+    return nil
 }

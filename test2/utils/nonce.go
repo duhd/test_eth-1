@@ -114,8 +114,6 @@ func LoadKeyStores(root string){
               }
               Wallets = append(Wallets,&wallet)
 
-
-
               client := Rclients.getClient()
                //Store full account key
               account := "account:" + list[2]
