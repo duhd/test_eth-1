@@ -115,7 +115,7 @@ func (rp *RedisPool) getClient() *redis.Client {
   if rp.Current >= len {
       rp.Current =  rp.Current % len
   }
-  fmt.Println("Current Redis connect: ",rp.Current," in ",len)
+  // fmt.Println("Current Redis connect: ",rp.Current," in ",len)
   client := rp.Clients[rp.Current]
   rp.Current = rp.Current + 1
 
