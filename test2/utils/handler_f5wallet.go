@@ -17,6 +17,7 @@ import (
   "encoding/hex"
   "test_eth/contracts/f5coin"
   "sync"
+  "math"
 )
 
 type F5WalletHandler struct {
@@ -73,7 +74,7 @@ func (fw *F5WalletHandler) NewAccountEth() (string, error) {
       new_account := &TokenAccount{
         Address: account,
         PrivateKey: priKey,
-        Active: false,
+        Active: true,
       }
 
       fmt.Println("Update account to db ")
@@ -161,8 +162,9 @@ func (fw *F5WalletHandler) LoadAccountEth(){
         Account: &account,
         Nonce: 0,
       }
-      fmt.Println("Start sync nonce of ",account.Address)
+
       if cfg.Webserver.NonceMode == 2 {
+          fmt.Println("Start sync nonce of ",account.Address)
           wallet.SyncNonce()
       }
       wallets = append(wallets,&wallet)
@@ -356,6 +358,7 @@ func (fw *F5WalletHandler) RegisterAccETH(listAcc []common.Address) (*types.Tran
       }
       if account.IsAvailable() {
           auth := account.NewTransactor()
+          auth.GasLimit = 9000000
           conn := fw.Client.GetConnection()
           session,err := f5coin.NewBusiness(fw.ContractAddress,conn.Client)
           if err != nil {
@@ -397,20 +400,60 @@ func (fw *F5WalletHandler) EthBalaneOf(account string) (*big.Float,error) {
 }
 func (fw *F5WalletHandler) EthTransfer(from string,to string,amount string) (string,error) {
    wallet := fw.GetAccountEthAddress(from)
-   txhash, _, err := wallet.EthTransfer(to,amount)
+
+   fromAddress := common.HexToAddress("0x" + wallet.Address)
+   nonce, err := wallet.Routing.PendingNonceAt(fromAddress)
+   if err != nil {
+     fmt.Println("Error in getting nonce ")
+     return "", err
+   }
+
+   gLimit := cfg.Contract.GasLimit
+   gPrice := cfg.Contract.GasPrice
+
+   gasLimit := uint64(gLimit)
+   gasPrice := new(big.Int)
+   gasPrice, _ = gasPrice.SetString(gPrice, 10)
+
+   toAddress := common.HexToAddress("0x" + to)
+
+   eth_unit := big.NewFloat(math.Pow10(18))
+   amount_value := new(big.Float)
+   value, ok := amount_value.SetString(amount)
+
+   if !ok {
+        fmt.Println("SetString: error")
+        return "", errors.New("convert amount error")
+   }
+   value = value.Mul(value,eth_unit)
+
+   value_transfer := new(big.Int)
+   value.Int(value_transfer)
+
+   var data []byte
+   rawTx := types.NewTransaction(nonce, toAddress, value_transfer, gasLimit, gasPrice, data)
+
+   signer := types.FrontierSigner{}
+   signature, err := crypto.Sign(signer.Hash(rawTx).Bytes(), wallet.PrivateKey)
+   if err != nil {
+     fmt.Println(" Cannot sign contract: ", err)
+     return "",err
+   }
+
+   signedTx, err := rawTx.WithSignature(signer, signature)
+
+   txhash := strings.TrimPrefix(signedTx.Hash().Hex(),"0x")
+   err = wallet.Routing.SubmitTransaction(signedTx,nonce)
+
    return txhash, err
 }
 
 func (fw *F5WalletHandler) AutoFillGas() bool {
-    budget := fw.GetAccountEthAddress(cfg.F5Contract.EthBudget)
-    if budget == nil {
-       fmt.Println("Cannot find bugdet account")
-       return false
-    }
-
     fw.Mutex.Lock()
     defer fw.Mutex.Unlock()
+
     for _, wallet := range fw.Wallets {
+
       bal, err := wallet.EthBalaneOf()
       if err != nil {
          fmt.Println("Cannot get wallet balance. Deactive wallet")
@@ -420,13 +463,15 @@ func (fw *F5WalletHandler) AutoFillGas() bool {
       ba,_ := bal.Float64()
       if ba < 1000 {
          fmt.Println("Create transaction to fillGass from budget")
-         txhash, nonce, err := budget.EthTransfer(wallet.Address,"1000")
+         txhash, err := fw.EthTransfer(cfg.F5Contract.EthBudget, wallet.Address,"1000")
          if err != nil {
            fmt.Println("Cannot fill more gas. Deactive wallet ")
            wallet.Active = false
            continue
          }
-         fmt.Println("Fill Eth to account: ", wallet.Address, " with nonce: ", nonce, " transaction: ", txhash)
+         fmt.Println("Fill Eth to account: ", wallet.Address, " transaction: ", txhash)
+      } else {
+         fmt.Println("Account: ", wallet.Address, " balance: ", ba)
       }
     }
     return true

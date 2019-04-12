@@ -11,7 +11,7 @@ import (
 
 func (w *WalletAccount) GetNonce() uint64 {
     nonce := atomic.AddUint64(&w.Nonce, 1)
-    fmt.Println("Get Nonce:",nonce)
+    fmt.Println("WalletAccount.GetNonce: Get Nonce:",nonce)
     return nonce
 }
 

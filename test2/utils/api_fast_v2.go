@@ -90,10 +90,10 @@ func (api *ApiFastV2) ProcessCall(c *routing.Context) error {
    return nil
  }
 func (api *ApiFastV2)  registerAccounts(c *routing.Context){
+		 api.walletHandler.LoadAccountEth()
+		 api.walletHandler.AutoFillGas()
 		 list := api.walletHandler.GetAccountList()
-
 		 j := 0
-
 		 sublist := []common.Address{}
 		 for _,item := range list {
 			  if j == 0 {
@@ -117,7 +117,7 @@ func (api *ApiFastV2)  registerAccounts(c *routing.Context){
  func (api *ApiFastV2)  create(c *routing.Context){
      account := c.Param("p1")
      account = strings.TrimPrefix(account,"0x")
-		 typeStash := c.Param("typeStash")
+		 typeStash := c.Param("p2")
 
 		 typewallet, err :=  strconv.Atoi(typeStash)
 		 if err != nil {
@@ -270,6 +270,7 @@ func (api *ApiFastV2)  registerAccounts(c *routing.Context){
   	 list := []string{}
 		 for _,account := range accounts {
 			   addr := account.Hex()
+				 addr = strings.ToLower(strings.TrimPrefix(addr,"0x"))
 				 list = append(list,addr)
 		 }
     fmt.Fprintf(c,"accounts: %v",list )
