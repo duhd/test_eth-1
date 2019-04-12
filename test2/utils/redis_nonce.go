@@ -13,69 +13,14 @@ import (
   "github.com/ethereum/go-ethereum/crypto"
     "github.com/ethereum/go-ethereum/accounts/abi/bind"
   "github.com/ethereum/go-ethereum/accounts/keystore"
-  "crypto/ecdsa"
-   "sync/atomic"
-  "github.com/ethereum/go-ethereum/common"
+  // "crypto/ecdsa"
+  //  "sync/atomic"
+  // "github.com/ethereum/go-ethereum/common"
     "github.com/ethereum/go-ethereum/ethclient"
 )
 
-type WalletAccount struct {
-    Address string
-    Nonce uint64
-    PrivateKey *ecdsa.PrivateKey
-}
 
-
-func (w *WalletAccount) GetNonce() uint64 {
-    nonce := atomic.AddUint64(&w.Nonce, 1)
-    fmt.Println("Get Nonce:",nonce)
-    return nonce
-}
-
-func (w *WalletAccount) UpdateNonce(nonce uint64)  {
-    fmt.Println("Update: ",w.Address," Nonce:",nonce)
-    atomic.StoreUint64(&w.Nonce, nonce-1)
-}
-
-
-func SyncNonce(backend   *ethclient.Client){
-  for _,wallet := range Wallets {
-    keyAddr := common.HexToAddress(wallet.Address)
-    nonce, err := backend.PendingNonceAt(context.Background(), keyAddr)
-    if err != nil {
-      fmt.Errorf("failed to retrieve account nonce: %v", err)
-      nonce = 0
-    }
-    fmt.Println("Nonce from eth: ",nonce)
-    wallet.UpdateNonce(nonce)
-  }
-}
-
-func GetWallet(addr string) *WalletAccount {
-    for _, wallet := range Wallets {
-       if wallet.Address == addr {
-         return wallet
-       }
-    }
-    return nil
-}
-// var cfg *Config
-var Wallets []*WalletAccount
-
-func DeleteData(pattern string){
-  client := Rclients.getClient()
-  keys, err  := client.Keys(pattern).Result()
-  if err != nil {
-    // handle error
-    fmt.Println(" Cannot get keys ")
-  }
-  if len(keys) >0 {
-    res := client.Del(keys...)
-    fmt.Println("Redis delete: ", res)
-  }
-}
-
-func LoadKeyStores(root string){
+func (rp *RedisPool) LoadKeyStoresToRedis(root string){
     var files []string
     err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
                files = append(files, path)
@@ -95,8 +40,6 @@ func LoadKeyStores(root string){
                   fmt.Println("Error in read file: ", file )
                   continue
              }
-
-
               //Store account private key
               accountKey, err := keystore.DecryptKey( []byte(keyjson), cfg.Keys.Password)
               if err != nil {
@@ -105,16 +48,7 @@ func LoadKeyStores(root string){
               }
               privateKey := accountKey.PrivateKey
 
-
-              //Add to array list
-              wallet := WalletAccount{
-                  Address: list[2],
-                  Nonce: uint64(0),
-                  PrivateKey: privateKey,
-              }
-              Wallets = append(Wallets,&wallet)
-
-              client := Rclients.getClient()
+              client := redisCache.getClient()
                //Store full account key
               account := "account:" + list[2]
               //Set key in redis
@@ -132,8 +66,23 @@ func LoadKeyStores(root string){
          }
     }
 }
-func GetAccountList() ([]string, error){
-  client := Rclients.getClient()
+
+
+func (rp *RedisPool) DeleteData(pattern string){
+  client := redisCache.getClient()
+  keys, err  := client.Keys(pattern).Result()
+  if err != nil {
+    // handle error
+    fmt.Println(" Cannot get keys ")
+  }
+  if len(keys) >0 {
+    res := client.Del(keys...)
+    fmt.Println("Redis delete: ", res)
+  }
+}
+
+func (rp *RedisPool) GetAccountList() ([]string, error){
+  client := redisCache.getClient()
   keys, err  := client.Keys("account*").Result()
   if err != nil {
     // handle error
@@ -147,8 +96,9 @@ func GetAccountList() ([]string, error){
   }
   return accounts, nil
 }
-func GetRedisAccountKey(account string) (string, error) {
-    client := Rclients.getClient()
+
+func (rp *RedisPool) GetRedisAccountKey(account string) (string, error) {
+    client := redisCache.getClient()
     key, err := client.Get("private:"+account).Result()
     if err != nil {
       // handle error
@@ -158,18 +108,18 @@ func GetRedisAccountKey(account string) (string, error) {
     return key, err
 }
 
-func getNonce(backend  *ethclient.Client, account string) uint64 {
-     nonce := GetNonce(account)
+func (rp *RedisPool) getNonce(backend  *ethclient.Client, account string) uint64 {
+     nonce := rp.GetNonce(account)
      if nonce == 0 {
-        nonce, _ = UpdateNonceFromEth(backend, account)
-        CommitNonce(account,nonce)
+        nonce, _ = rp.UpdateNonceFromEth(backend, account)
+        rp.CommitNonce(account,nonce)
      }
-     NoneIncr(account)
+     rp.NoneIncr(account)
      return nonce
 }
 
-func UpdateNonceFromEth(backend  *ethclient.Client, account string) (uint64,error) {
-      client := Rclients.getClient()
+func (rp *RedisPool) UpdateNonceFromEth(backend  *ethclient.Client, account string) (uint64,error) {
+      client := redisCache.getClient()
       keyjson, err := client.Get("account:"+account).Result()
       if err != nil {
           return 0, err
@@ -177,7 +127,7 @@ func UpdateNonceFromEth(backend  *ethclient.Client, account string) (uint64,erro
 
       opts, err := bind.NewTransactor(strings.NewReader(keyjson),cfg.Keys.Password)
       if err != nil {
-            fmt.Println("Failed to create authorized transactor: %v", err)
+            fmt.Println("Failed to create authorized transactor: ", err)
             return 0, err
       }
       var nonce uint64
@@ -189,14 +139,14 @@ func UpdateNonceFromEth(backend  *ethclient.Client, account string) (uint64,erro
       } else {
         nonce = opts.Nonce.Uint64()
       }
-      if CommitNonce(account,nonce) {
-        fmt.Println("Failed to create authorized transactor: %v", err)
+      if rp.CommitNonce(account,nonce) {
+        fmt.Println("Failed to create authorized transactor: ", err)
       }
       return nonce,nil
 }
 
-func  GetNonce(account string) uint64 {
-  client := Rclients.getClient()
+func (rp *RedisPool) GetNonce(account string) uint64 {
+  client := redisCache.getClient()
   val, err := client.Get("nonce:" + account).Result()
   if err != nil {
       fmt.Println("Cannot find nonce of account: ", account)
@@ -209,8 +159,9 @@ func  GetNonce(account string) uint64 {
   }
   return value
 }
-func CommitNonce(account string, nonce uint64) bool {
-  client := Rclients.getClient()
+
+func (rp *RedisPool) CommitNonce(account string, nonce uint64) bool {
+  client := redisCache.getClient()
   err := client.Set("nonce:" + account,uint64(nonce), 0).Err()
   if err != nil {
        fmt.Println("Cannot set nonce  ", err)
@@ -218,8 +169,9 @@ func CommitNonce(account string, nonce uint64) bool {
   }
   return true
 }
-func  NoneIncr(account string) bool {
-  client := Rclients.getClient()
+
+func (rp *RedisPool) NoneIncr(account string) bool {
+  client := redisCache.getClient()
   _, err := client.Incr("nonce:" + account).Result()
 	if err != nil {
     fmt.Println("Cannot increase nonce  ", err)

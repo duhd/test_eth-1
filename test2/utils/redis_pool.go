@@ -26,7 +26,7 @@ type RedisPool struct {
    mutex sync.Mutex
 }
 
-var Rclients *RedisPool
+var redisCache *RedisPool
 
 func NewRedisPool() *RedisPool{
   max_connection := cfg.Redis.MaxConn
@@ -44,21 +44,22 @@ func NewRedisPool() *RedisPool{
    startTxCh := make(chan *Transaction,cfg.Channel.LogQueue)
    endTxCh := make(chan *Transaction,cfg.Channel.LogQueue)
 
-   Rclients =  &RedisPool{
+   redisCache =  &RedisPool{
         Clients:clients,
         Current:0,
         StartTxCh: startTxCh,
         EndTxCh: endTxCh,
    }
-   return Rclients
+   return redisCache
 }
+
 func (rp *RedisPool) Process() {
   for {
       select {
             case  tx:= <- rp.StartTxCh:
               go func() {
                 fmt.Println("Write transation:",tx.Id, " to redis")
-                client := Rclients.getClient()
+                client := redisCache.getClient()
                 value, err := json.Marshal(tx)
                 if err != nil {
                     fmt.Println(err)
@@ -71,7 +72,7 @@ func (rp *RedisPool) Process() {
             case  tx:= <- rp.EndTxCh:
               go func(){
                 fmt.Println("Get transation:",tx.Id, " from redis")
-                client := Rclients.getClient()
+                client := redisCache.getClient()
                 val, err2 := client.Get("transaction:" + tx.Id).Result()
                 if err2 != nil {
                     fmt.Println(time.Now()," Cannot find transaction: ", tx.Id)
