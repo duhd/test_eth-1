@@ -1,5 +1,53 @@
-Running
+**********************************************************************************************
+# Deploy F5 Contract
 
+## 0. Config
+File config thay doi. Please update new
+
+## 1. Deploy contract & Test with manual
+go run deploy_f5wallet.go
+ go run f5wallet_manual.go
+
+## 2. Run webserver, BockEvebt listen, ContractEvent Listen
+go run fast_web_server.go
+go run block_subscribe.go
+go run event_log.go
+
+## 3. List of Api
+#### **************  ETH Account ***************
+##### 1. Create new ETH account
+http://http://localhost:8080/api/v2/wallet/new_account
+
+##### 2. View list Eth Account in system
+http://localhost:8080/api/v2/wallet/accounts
+
+##### 3. View Balance of Eth Account
+http://localhost:8080/api/v2/wallet/eth_balance/59f5545079762e130efaf873e7d28b2756fbc4b6
+
+#### **************  Contract API ***************
+##### 1. Register EthAccount
+http://localhost:8080/api/v2/wallet/register
+
+##### 2. Create Wallet
+http://localhost:8080/api/v2/wallet/create/vi03/1
+
+##### 3. Set Wallet state
+http://localhost:8080/api/v2/wallet/set_state/vi03/vi03/1
+
+##### 4. View wallet balance
+http://localhost:8080/api/v2/wallet/balance/vi03
+
+##### 5. Credit
+http://localhost:8080/api/v2/wallet/deposit/vi03/vi03/1000
+
+##### 6. Debit
+http://localhost:8080/api/v2/wallet/withdraw/vi03/vi03/1000
+
+##### 7. Transfer Money
+http://localhost:8080/api/v2/wallet/transfer/tx01/VI01/vi03/100/Test/1
+
+Running
+**********************************************************************************************
 ### 1. Install go
 sudo apt-get update
 sudo apt-get -y upgrade
