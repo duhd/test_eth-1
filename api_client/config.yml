@@ -1,0 +1,12 @@
+version: 1.0
+released: 2019-04-09
+connection:
+    host: localhost
+    port: 8080
+    protocol: http
+    keyStoreFile: "webcerts.jks"
+    keyStorePassword: "123456"
+jwt:
+    signkey: "TestForFasthttpWithJWT"
+    username: duhd
+    password: 123456
