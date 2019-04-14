@@ -288,7 +288,7 @@ func (cf *Config) LoadKeyStoresToDB(){
              new_account := &TokenAccount{
                Address: account,
                PrivateKey: privateKey,
-               Active: false,
+               Active: true,
              }
              //fmt.Println("Create new record")
              db.Create(new_account)
