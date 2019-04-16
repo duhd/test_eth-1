@@ -198,7 +198,9 @@ func (fw *F5WalletHandler) CreateStash(stashName string, typeStash int8) (*types
           auth := account.NewTransactor()
           conn.Mux.Lock()
           defer  conn.Mux.Unlock()
-          return session.CreateStash(auth,stringTo32Byte(stashName), typeStash)
+          bs := stringTo32Byte(stashName)
+          fmt.Println("Using: ", account, " to create Wallet: ",stashName, " len: ", len(bs) )
+          return session.CreateStash(auth,bs, typeStash)
         }
         retry = retry + 1
     }
