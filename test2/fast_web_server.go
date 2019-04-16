@@ -66,19 +66,19 @@ func main() {
 
 func httpServer(){
 	router := routing.New()
-	api_v1 := router.Group("/api/v1/wallet")
 
-	fast_api := utils.NewApiFast(cfg,rpcrouting,redisCache)
-  api_v1.Get("/<method>/<p1>/<p2>/<p3>/<p4>/<p5>/<p6>", fast_api.ProcessCall)
-	api_v1.Get("/<method>/<p1>/<p2>/<p3>/<p4>/<p5>", fast_api.ProcessCall)
-	api_v1.Get("/<method>/<p1>/<p2>/<p3>/<p4>", fast_api.ProcessCall)
-	api_v1.Get("/<method>/<p1>/<p2>/<p3>", fast_api.ProcessCall)
-	api_v1.Get("/<method>/<p1>/<p2>",  fast_api.ProcessCall)
-	api_v1.Get("/<method>/<p1>", fast_api.ProcessCall)
-	api_v1.Get("/<method>",  fast_api.ProcessCall)
+	//
+	// api_v1 := router.Group("/api/v1/wallet")
+	// fast_api := utils.NewApiFast(cfg,rpcrouting,redisCache)
+  // api_v1.Get("/<method>/<p1>/<p2>/<p3>/<p4>/<p5>/<p6>", fast_api.ProcessCall)
+	// api_v1.Get("/<method>/<p1>/<p2>/<p3>/<p4>/<p5>", fast_api.ProcessCall)
+	// api_v1.Get("/<method>/<p1>/<p2>/<p3>/<p4>", fast_api.ProcessCall)
+	// api_v1.Get("/<method>/<p1>/<p2>/<p3>", fast_api.ProcessCall)
+	// api_v1.Get("/<method>/<p1>/<p2>",  fast_api.ProcessCall)
+	// api_v1.Get("/<method>/<p1>", fast_api.ProcessCall)
+	// api_v1.Get("/<method>",  fast_api.ProcessCall)
 
 	api_v2 := router.Group("/api/v2/wallet")
-
 	fast_api_v2 := utils.NewApiFastV2(cfg,rpcrouting,redisCache)
 	api_v2.Get("/<method>/<p1>/<p2>/<p3>/<p4>/<p5>/<p6>", fast_api_v2.ProcessCall)
 	api_v2.Get("/<method>/<p1>/<p2>/<p3>/<p4>/<p5>", fast_api_v2.ProcessCall)

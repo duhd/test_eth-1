@@ -16,7 +16,7 @@ func (w *WalletAccount) GetNonce() uint64 {
 }
 
 func (w *WalletAccount) UpdateNonce(nonce uint64)  {
-    fmt.Println("Update: ",w.Address," Nonce:",nonce)
+    fmt.Println("Update nonce of: ",w.Address," Nonce:",nonce)
     atomic.StoreUint64(&w.Nonce, nonce-1)
 }
 
@@ -29,7 +29,7 @@ func (w *WalletAccount) SyncNonce(){
     w.UpdateNonce(0)
     return
   }
-  fmt.Println("Nonce from eth: ",nonce)
+  fmt.Println("Sync nonce from eth: ",nonce)
   w.UpdateNonce(nonce)
 }
 
