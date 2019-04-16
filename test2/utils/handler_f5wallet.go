@@ -183,7 +183,16 @@ func (fw *F5WalletHandler) LoadAccountEth(){
   defer fw.Mutex.Unlock()
   fw.Wallets = wallets
 }
-
+func  (fw *F5WalletHandler)  GetRegistedAccEthLength() int16 {
+      conn := fw.Client.GetConnection()
+      instance, err := f5coin.NewBusiness(fw.ContractAddress,conn.Client)
+      n,err := instance.GetRegistedAccEthLength(&bind.CallOpts{})
+      if err != nil {
+        fmt.Println("Cannot Get RegistedAccEthLength: ", cfg.F5Contract.Owner, ", error: ",err)
+        return 0
+      }
+      return n
+}
 func (fw *F5WalletHandler) CreateStash(stashName string, typeStash int8) (*types.Transaction, error)  {
     retry := 0
     for retry <10 {
@@ -362,7 +371,7 @@ func (fw *F5WalletHandler) RegisterAccETH(listAcc []common.Address) (*types.Tran
   fmt.Println("Start RegisterAccETH")
   retry := 0
   for retry <10 {
-      account := fw.GetAccountEth()
+      account := fw.GetAccountEthAddress(cfg.F5Contract.Owner)
       if account == nil {
          fmt.Println("Cannot find active account")
          return nil, errors.New("Cannot find bugdet account")

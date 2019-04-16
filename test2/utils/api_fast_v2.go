@@ -68,6 +68,10 @@ func (api *ApiFastV2) ProcessCall(c *routing.Context) error {
 		 			 fmt.Println("call register")
 		 			 api.registerAccounts(c)
 		 			 return nil
+			 case "register_length":
+					 fmt.Println("call register length: ")
+					 api.lengthOfRegisterEthAccounts(c)
+					 return nil
        case "accounts":
            fmt.Println("call accounts")
            api.accounts(c)
@@ -88,6 +92,10 @@ func (api *ApiFastV2) ProcessCall(c *routing.Context) error {
 
    fmt.Fprintf(c, "URL not found ")
    return nil
+ }
+ func (api *ApiFastV2) lengthOfRegisterEthAccounts(c *routing.Context){
+	  n := api.walletHandler.GetRegistedAccEthLength()
+		fmt.Fprintf(c," ETH Registered Length: "+string(n))
  }
 func (api *ApiFastV2)  registerAccounts(c *routing.Context){
 		 api.walletHandler.LoadAccountEth()
