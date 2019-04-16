@@ -68,9 +68,9 @@ func (api *ApiFastV2) ProcessCall(c *routing.Context) error {
 		 			 fmt.Println("call register")
 		 			 api.registerAccounts(c)
 		 			 return nil
-			 case "register_length":
-					 fmt.Println("call register length: ")
-					 api.lengthOfRegisterEthAccounts(c)
+			 case "summary":
+					 fmt.Println("call summary ")
+					 api.summary(c)
 					 return nil
        case "accounts":
            fmt.Println("call accounts")
@@ -93,9 +93,14 @@ func (api *ApiFastV2) ProcessCall(c *routing.Context) error {
    fmt.Fprintf(c, "URL not found ")
    return nil
  }
- func (api *ApiFastV2) lengthOfRegisterEthAccounts(c *routing.Context){
-	  n := api.walletHandler.GetRegistedAccEthLength()
-		fmt.Fprintf(c," ETH Registered Length: "+strconv.Itoa(int(n)))
+ func (api *ApiFastV2) summary(c *routing.Context){
+	  n_account, n_wallet, n_credit, n_debit, n_transfer := api.walletHandler.GetSummary()
+		ret_list := []string { "Number of registered Eth Accounts: " + strconv.Itoa(int(n_account)),
+			" Number of wallet: " + n_wallet.String() ,
+			" Number of credit transactions: " + n_credit.String() ,
+			" Number of debit transactions: " +  n_debit.String() ,
+			"  Number of transfer transactions: " +  n_transfer.String()}
+		fmt.Fprintf(c,strings.Join(ret_list, ","))
  }
 func (api *ApiFastV2)  registerAccounts(c *routing.Context){
 		 api.walletHandler.LoadAccountEth()
@@ -239,12 +244,12 @@ func (api *ApiFastV2)  registerAccounts(c *routing.Context){
      // fmt.Fprintf(c,"transaction: penđing")
  }
  // call transfer token
- func (api *ApiFastV2) report(c *routing.Context){
-     fmt.Println("Start report")
-     report := api.redisHandler.Report()
-
-     fmt.Fprintf(c,"data:" + report)
- }
+ // func (api *ApiFastV2) report(c *routing.Context){
+ //     fmt.Println("Start report")
+ //     report := api.redisHandler.Report()
+ //
+ //     fmt.Fprintf(c,"data:" + report)
+ // }
  func (api *ApiFastV2) new_account(c *routing.Context){
      account, err := api.walletHandler.NewAccountEth()
      if err != nil {

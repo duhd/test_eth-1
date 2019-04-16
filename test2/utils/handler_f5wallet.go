@@ -185,15 +185,36 @@ func (fw *F5WalletHandler) LoadAccountEth(){
   defer fw.Mutex.Unlock()
   fw.Wallets = wallets
 }
-func  (fw *F5WalletHandler)  GetRegistedAccEthLength() int16 {
+func  (fw *F5WalletHandler)  GetSummary() (int16,*big.Int, *big.Int, *big.Int,*big.Int)   {
       conn := fw.Client.GetConnection()
       instance, err := f5coin.NewBusiness(fw.ContractAddress,conn.Client)
-      n,err := instance.GetRegistedAccEthLength(&bind.CallOpts{})
+
+      n_account, err := instance.GetRegistedAccEthLength(&bind.CallOpts{})
       if err != nil {
-        fmt.Println("Cannot Get RegistedAccEthLength: ", cfg.F5Contract.Owner, ", error: ",err)
-        return 0
+        fmt.Println("Cannot Get Registed Acc Eth Length error: ",err)
+        return 0, nil, nil, nil, nil
       }
-      return n
+      n_wallet, err := instance.GetStashNamesLenght(&bind.CallOpts{})
+      if err != nil {
+        fmt.Println("Cannot Get length of wallets, error: ",err)
+        return n_account, nil, nil, nil, nil
+      }
+      n_credit, err := instance.GetCreditHistoryLength(&bind.CallOpts{})
+      if err != nil {
+        fmt.Println("Cannot Get length of credits, error: ",err)
+        return n_account, n_wallet, nil, nil, nil
+      }
+      n_debit, err := instance.GetDebitHistoryLength(&bind.CallOpts{})
+      if err != nil {
+        fmt.Println("Cannot Get length of debit error: ",err)
+        return n_account, n_wallet, n_credit, nil, nil
+      }
+      n_transfer, err := instance.GetTransferHistoryLength(&bind.CallOpts{})
+      if err != nil {
+        fmt.Println("Cannot Get length of transfer, error: ",err)
+        return n_account, n_wallet, n_credit, n_debit, nil
+      }
+      return  n_account, n_wallet, n_credit, n_debit, n_transfer
 }
 func (fw *F5WalletHandler) CreateStash(stashName string, typeStash int8) (*types.Transaction, error)  {
     retry := 0
