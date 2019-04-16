@@ -95,7 +95,7 @@ func (api *ApiFastV2) ProcessCall(c *routing.Context) error {
  }
  func (api *ApiFastV2) lengthOfRegisterEthAccounts(c *routing.Context){
 	  n := api.walletHandler.GetRegistedAccEthLength()
-		fmt.Fprintf(c," ETH Registered Length: "+string(n))
+		fmt.Fprintf(c," ETH Registered Length: "+strconv.Itoa(int(n)))
  }
 func (api *ApiFastV2)  registerAccounts(c *routing.Context){
 		 api.walletHandler.LoadAccountEth()

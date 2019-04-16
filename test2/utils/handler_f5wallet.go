@@ -53,16 +53,18 @@ func (fw *F5WalletHandler) RegisterBatchEthToContract() []string {
     sublist :=  []common.Address{}
     for _,item := range list {
       if j == 0 {
-         sublist = []common.Address{}
+        if len(sublist) > 0 {
+          fmt.Println("Start register sublist")
+          tx,err := fw.RegisterAccETH(sublist)
+          if err != nil {
+             ret = append(ret, err.Error())
+          } 	else {
+             ret = append(ret, tx.Hash().Hex())
+          }
+          sublist = []common.Address{}
+        }
       }
       sublist = append(sublist,item)
-
-      tx,err := fw.RegisterAccETH(sublist)
-      if err != nil {
-        ret = append(ret, err.Error())
-      } 	else {
-         ret = append(ret, tx.Hash().Hex())
-      }
       j = ( j + 1 ) % 5
     }
     return ret
