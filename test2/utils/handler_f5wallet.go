@@ -230,7 +230,7 @@ func (fw *F5WalletHandler) GetBalance(stashName string) (*big.Int, error)  {
 //     }
 //     return session.GetStateHistoryLength(&bind.CallOpts{})
 // }
-func (fw *F5WalletHandler) SetState(txRef string, stashName string, stashState int8 ) (*types.Transaction, error)  {
+func (fw *F5WalletHandler) SetState(stashName string, stashState int8 ) (*types.Transaction, error)  {
   retry := 0
   for retry <10 {
       account := fw.GetAccountEth()

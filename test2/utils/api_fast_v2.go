@@ -145,17 +145,16 @@ func (api *ApiFastV2)  registerAccounts(c *routing.Context){
  }
  // call set wallet state
  func (api *ApiFastV2) set_state(c *routing.Context){
-		 txRef := c.Param("p1")
-		 account := c.Param("p2")
+		 account := c.Param("p1")
 		 account = strings.TrimPrefix(account,"0x")
-		 state := c.Param("p3")
+		 state := c.Param("p2")
 
 		 stashState, err := strconv.Atoi(state)
 		 if err != nil {
 			fmt.Fprintf(c,"error: Please txType as integer ")
 			return
 		}
-		 tx, err := api.walletHandler.SetState(txRef,account,int8(stashState))
+		 tx, err := api.walletHandler.SetState(account,int8(stashState))
 		 if err != nil {
 				 fmt.Fprintf(c,"error: %v",err)
 				 return
