@@ -41,8 +41,8 @@ func NewF5WalletHandler(contract_address string, client *RpcRouting)  *F5WalletH
         ContractAddress: contractAddress,
         Current: 0,
       }
-      // wallHandler.LoadAccountEth()
-      // wallHandler.AutoFillGas()
+      wallHandler.LoadAccountEth()
+      wallHandler.AutoFillGas()
       // wallHandler.RegisterBatchEthToContract()
       return wallHandler
 }
