@@ -9,6 +9,7 @@ import (
   // "github.com/go-redis/redis"
   // "encoding/json"
 	  "strconv"
+		"time"
 )
 
 type ApiFastV2 struct {
@@ -49,11 +50,11 @@ func (api *ApiFastV2) ProcessCall(c *routing.Context) error {
            return nil
 			 case "withdraw":
            fmt.Println("call withdraw")
-           api.withdraw(c)
+           api.debit(c)
            return nil
 			 case "deposit":
            fmt.Println("call deposit")
-           api.deposit(c)
+           api.credit(c)
            return nil
 			 case "transfer":
  					fmt.Println("call transfer")
@@ -63,7 +64,10 @@ func (api *ApiFastV2) ProcessCall(c *routing.Context) error {
            fmt.Println("call new_account")
            api.new_account(c)
            return nil
-
+			 case "autofill":
+		 			 fmt.Println("call autofill")
+		 			 api.autofill(c)
+		 			 return nil
 			 case "register":
 		 			 fmt.Println("call register")
 		 			 api.registerAccounts(c)
@@ -102,10 +106,16 @@ func (api *ApiFastV2) ProcessCall(c *routing.Context) error {
 			"  Number of transfer transactions: " +  n_transfer.String()}
 		fmt.Fprintf(c,strings.Join(ret_list, ","))
  }
+func (api *ApiFastV2)  autofill(c *routing.Context){
+			api.walletHandler.LoadAccountEth()
+			ret_list := api.walletHandler.AutoFillGas()
+			fmt.Fprintf(c,strings.Join(ret_list, ","))
+ }
 func (api *ApiFastV2)  registerAccounts(c *routing.Context){
 		 api.walletHandler.LoadAccountEth()
 		 api.walletHandler.AutoFillGas()
-		 list := api.walletHandler.RegisterBatchEthToContract()
+		 requestTime := time.Now().UnixNano()
+		 list := api.walletHandler.RegisterBatchEthToContract(requestTime)
 		 list_string := strings.Join(list,",")
 		 fmt.Fprintf(c,list_string)
 }
@@ -120,8 +130,8 @@ func (api *ApiFastV2)  registerAccounts(c *routing.Context){
          fmt.Fprintf(c,"error: %v",err)
          return
      }
-
-     tx, err := api.walletHandler.CreateStash(account,int8(typewallet))
+		 requestTime := time.Now().UnixNano()
+     tx, err := api.walletHandler.CreateStash(requestTime,account,int8(typewallet))
      if err != nil {
          fmt.Fprintf(c,"error: %v",err)
          return
@@ -167,7 +177,8 @@ func (api *ApiFastV2)  registerAccounts(c *routing.Context){
 			fmt.Fprintf(c,"error: Please txType as integer ")
 			return
 		}
-		 tx, err := api.walletHandler.SetState(account,int8(stashState))
+		requestTime := time.Now().UnixNano()
+		 tx, err := api.walletHandler.SetState(requestTime,account,int8(stashState))
 		 if err != nil {
 				 fmt.Fprintf(c,"error: %v",err)
 				 return
@@ -176,7 +187,7 @@ func (api *ApiFastV2)  registerAccounts(c *routing.Context){
  }
 
  // call get wallet state
- func (api *ApiFastV2) withdraw(c *routing.Context){
+ func (api *ApiFastV2) debit(c *routing.Context){
 		txRef := c.Param("p1")
 		account := c.Param("p2")
 		account = strings.TrimPrefix(account,"0x")
@@ -185,7 +196,8 @@ func (api *ApiFastV2)  registerAccounts(c *routing.Context){
 		amount := new(big.Int)
 		amount.SetString(value,10)
 
-		tx, err := api.walletHandler.Withdraw(txRef,account,amount)
+		requestTime := time.Now().UnixNano()
+		tx, err := api.walletHandler.Debit(requestTime,txRef,account,amount)
 		if err != nil {
 				fmt.Fprintf(c,"error: %v",err)
 				return
@@ -193,7 +205,7 @@ func (api *ApiFastV2)  registerAccounts(c *routing.Context){
 		fmt.Fprintf(c,"transaction hash: ",tx.Hash().Hex())
  }
  // call get wallet state
- func (api *ApiFastV2) deposit(c *routing.Context){
+ func (api *ApiFastV2) credit(c *routing.Context){
 	 txRef := c.Param("p1")
 	 account := c.Param("p2")
 	 account = strings.TrimPrefix(account,"0x")
@@ -202,7 +214,8 @@ func (api *ApiFastV2)  registerAccounts(c *routing.Context){
 	 amount := new(big.Int)
 	 amount.SetString(value,10)
 
-	 tx, err := api.walletHandler.Deposit(txRef,account,amount)
+	 requestTime := time.Now().UnixNano()
+	 tx, err := api.walletHandler.Credit(requestTime,txRef,account,amount)
 	 if err != nil {
 			 fmt.Fprintf(c,"error: %v",err)
 			 return
@@ -235,7 +248,8 @@ func (api *ApiFastV2)  registerAccounts(c *routing.Context){
 			 return
 		 }
 
-  	 result, err := api.walletHandler.Transfer(txRef,sender,receiver,amount,note,int8(txType))
+		 requestTime := time.Now().UnixNano()
+  	 result, err := api.walletHandler.Transfer(requestTime, txRef,sender,receiver,amount,note,int8(txType))
      if err != nil {
            fmt.Fprintf(c,"Error to transfer token: %v", err)
            return

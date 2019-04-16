@@ -24,6 +24,9 @@ http://localhost:8080/api/v2/wallet/accounts
 ##### 3. View Balance of Eth Account
 http://localhost:8080/api/v2/wallet/eth_balance/59f5545079762e130efaf873e7d28b2756fbc4b6
 
+##### 2. View list Eth Account auto fill gas
+http://localhost:8080/api/v2/wallet/autofill 
+
 #### **************  Contract API ***************
 ##### 1. Register EthAccount
 http://localhost:8080/api/v2/wallet/register
@@ -32,7 +35,7 @@ http://localhost:8080/api/v2/wallet/register
 http://localhost:8080/api/v2/wallet/create/vi03/1
 
 ##### 3. Set Wallet state
-http://localhost:8080/api/v2/wallet/set_state/vi03/vi03/1
+http://localhost:8080/api/v2/wallet/set_state/vi03/1
 
 ##### 4. View wallet balance
 http://localhost:8080/api/v2/wallet/balance/vi03
@@ -45,6 +48,9 @@ http://localhost:8080/api/v2/wallet/withdraw/vi03/vi03/1000
 
 ##### 7. Transfer Money
 http://localhost:8080/api/v2/wallet/transfer/tx01/VI01/vi03/100/Test/1
+
+##### 8. Summary
+http://localhost:8080/api/v2/wallet/summary
 
 Running
 **********************************************************************************************

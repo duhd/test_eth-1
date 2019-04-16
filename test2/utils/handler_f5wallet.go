@@ -18,6 +18,7 @@ import (
   "test_eth/contracts/f5coin"
   "sync"
   "math"
+  "strconv"
 )
 
 type F5WalletHandler struct {
@@ -46,7 +47,7 @@ func NewF5WalletHandler(contract_address string, client *RpcRouting)  *F5WalletH
       // wallHandler.RegisterBatchEthToContract()
       return wallHandler
 }
-func (fw *F5WalletHandler) RegisterBatchEthToContract() []string {
+func (fw *F5WalletHandler) RegisterBatchEthToContract(requestTime int64) []string {
     ret := []string{}
     list := fw.GetAccountList()
     j := 0
@@ -55,7 +56,7 @@ func (fw *F5WalletHandler) RegisterBatchEthToContract() []string {
       if j == 0 {
         if len(sublist) > 0 {
           fmt.Println("Start register sublist")
-          tx,err := fw.RegisterAccETH(sublist)
+          tx,err := fw.RegisterAccETH(requestTime,sublist)
           if err != nil {
              ret = append(ret, err.Error())
           } 	else {
@@ -216,7 +217,7 @@ func  (fw *F5WalletHandler)  GetSummary() (int16,*big.Int, *big.Int, *big.Int,*b
       }
       return  n_account, n_wallet, n_credit, n_debit, n_transfer
 }
-func (fw *F5WalletHandler) CreateStash(stashName string, typeStash int8) (*types.Transaction, error)  {
+func (fw *F5WalletHandler) CreateStash(requestTime int64, stashName string, typeStash int8) (*types.Transaction, error)  {
     retry := 0
     for retry <10 {
         account := fw.GetAccountEth()
@@ -232,7 +233,12 @@ func (fw *F5WalletHandler) CreateStash(stashName string, typeStash int8) (*types
           defer  conn.Mux.Unlock()
           bs := stringTo32Byte(stashName)
           fmt.Println("Using: ", account, " to create Wallet: ",stashName, " len: ", len(bs) )
-          return session.CreateStash(auth,bs, typeStash)
+          tx,err := session.CreateStash(auth,bs, typeStash)
+          if(err == nil){
+            //Log transaction
+            redisCache.LogStart(tx.Hash().Hex(), 0, requestTime )
+            return tx, err
+          }
         }
         retry = retry + 1
     }
@@ -262,7 +268,7 @@ func (fw *F5WalletHandler) GetBalance(stashName string) (*big.Int, error)  {
 //     }
 //     return session.GetStateHistoryLength(&bind.CallOpts{})
 // }
-func (fw *F5WalletHandler) SetState(stashName string, stashState int8 ) (*types.Transaction, error)  {
+func (fw *F5WalletHandler) SetState(requestTime int64, stashName string, stashState int8 ) (*types.Transaction, error)  {
   retry := 0
   for retry <10 {
       account := fw.GetAccountEth()
@@ -276,7 +282,12 @@ func (fw *F5WalletHandler) SetState(stashName string, stashState int8 ) (*types.
           }
           conn.Mux.Lock()
           defer  conn.Mux.Unlock()
-          return session.SetState(auth, stringTo32Byte(stashName),stashState)
+          tx,err := session.SetState(auth, stringTo32Byte(stashName),stashState)
+          if(err == nil){
+            //Log transaction
+            redisCache.LogStart(tx.Hash().Hex(), 0, requestTime )
+            return tx, err
+          }
       }
         retry = retry + 1
   }
@@ -308,7 +319,7 @@ func (fw *F5WalletHandler) GetState(stashName string) (int8, error)  {
 //     }
 //     return session.GetRedeemHistoryLength(&bind.CallOpts{})
 // }
-func (fw *F5WalletHandler) Withdraw(txRef string, stashName string, amount *big.Int) (*types.Transaction, error) {
+func (fw *F5WalletHandler) Debit(requestTime int64, txRef string, stashName string, amount *big.Int) (*types.Transaction, error) {
     retry := 0
     for retry <10 {
         account := fw.GetAccountEth()
@@ -322,7 +333,12 @@ func (fw *F5WalletHandler) Withdraw(txRef string, stashName string, amount *big.
             }
             conn.Mux.Lock()
             defer  conn.Mux.Unlock()
-            return session.Debit(auth, stringTo32Byte(txRef),stringTo32Byte(stashName),amount)
+            tx,err := session.Debit(auth, stringTo32Byte(txRef),stringTo32Byte(stashName),amount)
+            if(err == nil){
+              //Log transaction
+              redisCache.LogStart(tx.Hash().Hex(), 0, requestTime )
+              return tx, err
+            }
         }
           retry = retry + 1
     }
@@ -339,7 +355,7 @@ func (fw *F5WalletHandler) Withdraw(txRef string, stashName string, amount *big.
 //     }
 //     return session.GetPledgeHistoryLength(&bind.CallOpts{})
 // }
-func (fw *F5WalletHandler) Deposit(txRef string, stashName string, amount *big.Int) (*types.Transaction, error) {
+func (fw *F5WalletHandler) Credit(requestTime int64, txRef string, stashName string, amount *big.Int) (*types.Transaction, error) {
   retry := 0
   for retry <10 {
       account := fw.GetAccountEth()
@@ -347,13 +363,19 @@ func (fw *F5WalletHandler) Deposit(txRef string, stashName string, amount *big.I
           auth := account.NewTransactor()
           conn := fw.Client.GetConnection()
           session,err := f5coin.NewBusiness(fw.ContractAddress,conn.Client)
+
           if err != nil {
               fmt.Println("Cannot find F5 contract")
               return nil,err
           }
           conn.Mux.Lock()
           defer  conn.Mux.Unlock()
-          return session.Credit(auth, stringTo32Byte(txRef),stringTo32Byte(stashName),amount)
+          tx,err :=  session.Credit(auth, stringTo32Byte(txRef),stringTo32Byte(stashName),amount)
+          if(err == nil){
+            //Log transaction
+            redisCache.LogStart(tx.Hash().Hex(), 0, requestTime )
+            return tx, err
+          }
       }
   }
   return nil, errors.New("Cannot find wallet in pool to create transaction")
@@ -370,7 +392,7 @@ func (fw *F5WalletHandler) GetTransferHistoryLength() (*big.Int, error)  {
   return session.GetTransferHistoryLength(&bind.CallOpts{})
 
 }
-func (fw *F5WalletHandler) Transfer(txRef string, sender string, receiver string, amount *big.Int, note string, txType int8) (*types.Transaction, error) {
+func (fw *F5WalletHandler) Transfer(requestTime int64, txRef string, sender string, receiver string, amount *big.Int, note string, txType int8) (*types.Transaction, error) {
   retry := 0
   for retry <10 {
       account := fw.GetAccountEth()
@@ -384,13 +406,18 @@ func (fw *F5WalletHandler) Transfer(txRef string, sender string, receiver string
           }
           conn.Mux.Lock()
           defer  conn.Mux.Unlock()
-          return session.Transfer(auth, stringTo32Byte(txRef),stringTo32Byte(sender),stringTo32Byte(receiver),amount,note,txType)
+          tx, err :=  session.Transfer(auth, stringTo32Byte(txRef),stringTo32Byte(sender),stringTo32Byte(receiver),amount,note,txType)
+          if(err == nil){
+            //Log transaction
+            redisCache.LogStart(tx.Hash().Hex(), 0, requestTime )
+            return tx, err
+          }
       }
         retry = retry + 1
   }
   return nil, errors.New("Cannot find wallet in pool to create transaction")
 }
-func (fw *F5WalletHandler) RegisterAccETH(listAcc []common.Address) (*types.Transaction, error) {
+func (fw *F5WalletHandler) RegisterAccETH(requestTime int64, listAcc []common.Address) (*types.Transaction, error) {
   fmt.Println("Start RegisterAccETH")
   retry := 0
   for retry <10 {
@@ -410,7 +437,12 @@ func (fw *F5WalletHandler) RegisterAccETH(listAcc []common.Address) (*types.Tran
           }
           conn.Mux.Lock()
           defer  conn.Mux.Unlock()
-          return session.RegisterAccETH(auth,listAcc)
+          tx,err :=  session.RegisterAccETH(auth,listAcc)
+          if(err == nil){
+            //Log transaction
+            redisCache.LogStart(tx.Hash().Hex(), 0, requestTime )
+            return tx, err
+          }
       } else {
           fmt.Println("Account: ",account.Address," is unavailable ")
       }
@@ -491,12 +523,12 @@ func (fw *F5WalletHandler) EthTransfer(from string,to string,amount string) (str
    return txhash, err
 }
 
-func (fw *F5WalletHandler) AutoFillGas() bool {
+func (fw *F5WalletHandler) AutoFillGas() []string {
     fw.Mutex.Lock()
     defer fw.Mutex.Unlock()
 
+    ret := []string{}
     for _, wallet := range fw.Wallets {
-
       bal, err := wallet.EthBalaneOf()
       if err != nil {
          fmt.Println("Cannot get wallet balance. Deactive wallet")
@@ -506,16 +538,19 @@ func (fw *F5WalletHandler) AutoFillGas() bool {
       ba,_ := bal.Float64()
       if ba < 1000 {
          fmt.Println("Create transaction to fillGass from budget")
-         txhash, err := fw.EthTransfer(cfg.F5Contract.EthBudget, wallet.Address,"1000")
+         var fill_account int = int(1000 - ba)
+
+         txhash, err := fw.EthTransfer(cfg.F5Contract.EthBudget, wallet.Address,strconv.Itoa(fill_account))
          if err != nil {
            fmt.Println("Cannot fill more gas. Deactive wallet ")
            wallet.Active = false
            continue
          }
          fmt.Println("Fill Eth to account: ", wallet.Address, " transaction: ", txhash)
+         ret = append(ret,txhash)
       } else {
          fmt.Println("Account: ", wallet.Address, " balance: ", ba)
       }
     }
-    return true
+    return ret
 }
