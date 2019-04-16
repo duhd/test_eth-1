@@ -5,7 +5,7 @@ import (
 	"github.com/qiangxue/fasthttp-routing"
   "strings"
 	"math/big"
-	  	"github.com/ethereum/go-ethereum/common"
+	// "github.com/ethereum/go-ethereum/common"
   // "github.com/go-redis/redis"
   // "encoding/json"
 	  "strconv"
@@ -92,26 +92,9 @@ func (api *ApiFastV2) ProcessCall(c *routing.Context) error {
 func (api *ApiFastV2)  registerAccounts(c *routing.Context){
 		 api.walletHandler.LoadAccountEth()
 		 api.walletHandler.AutoFillGas()
-		 list := api.walletHandler.GetAccountList()
-		 j := 0
-		 sublist := []common.Address{}
-		 for _,item := range list {
-			  if j == 0 {
-					 sublist = []common.Address{}
-				}
-			  sublist = append(sublist,item)
-
-				tx,err := api.walletHandler.RegisterAccETH(sublist)
-				if err != nil {
-					fmt.Println("registerAccounts error: ", err)
-					fmt.Fprintf(c," registerAccounts error")
-				} 	else {
-					 fmt.Fprintf(c,"transaction: ", j ," hash: ",tx.Hash().Hex())
-				}
-
-			  j = ( j + 1 ) % 5
-		 }
-		 fmt.Fprintf(c,"End registerAccounts")
+		 list := api.walletHandler.RegisterBatchEthToContract()
+		 list_string := strings.Join(list,",")
+		 fmt.Fprintf(c,list_string)
 }
  // call create wallet
  func (api *ApiFastV2)  create(c *routing.Context){

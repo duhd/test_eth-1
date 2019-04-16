@@ -41,23 +41,32 @@ func NewF5WalletHandler(contract_address string, client *RpcRouting)  *F5WalletH
         ContractAddress: contractAddress,
         Current: 0,
       }
-      wallHandler.LoadAccountEth()
-      wallHandler.AutoFillGas()
-      list := wallHandler.GetAccountList()
-      j := 0
-      sublist :=  []common.Address{}
-      for _,item := range list {
- 			  if j == 0 {
- 					 sublist = []common.Address{}
- 				}
- 			  sublist = append(sublist,item)
-
- 				wallHandler.RegisterAccETH(sublist)
- 			  j = ( j + 1 ) % 5
- 		  }
+      // wallHandler.LoadAccountEth()
+      // wallHandler.AutoFillGas()
+      // wallHandler.RegisterBatchEthToContract()
       return wallHandler
 }
+func (fw *F5WalletHandler) RegisterBatchEthToContract() []string {
+    ret := []string{}
+    list := fw.GetAccountList()
+    j := 0
+    sublist :=  []common.Address{}
+    for _,item := range list {
+      if j == 0 {
+         sublist = []common.Address{}
+      }
+      sublist = append(sublist,item)
 
+      tx,err := fw.RegisterAccETH(sublist)
+      if err != nil {
+        ret = append(ret, err.Error())
+      } 	else {
+         ret = append(ret, tx.Hash().Hex())
+      }
+      j = ( j + 1 ) % 5
+    }
+    return ret
+}
 func (fw *F5WalletHandler) NewAccountEth() (string, error) {
       privateKey, err := crypto.GenerateKey()
       if err != nil {
