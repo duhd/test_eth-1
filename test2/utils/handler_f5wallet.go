@@ -419,35 +419,31 @@ func (fw *F5WalletHandler) Transfer(requestTime int64, txRef string, sender stri
 }
 func (fw *F5WalletHandler) RegisterAccETH(requestTime int64, listAcc []common.Address) (*types.Transaction, error) {
   fmt.Println("Start RegisterAccETH")
-  retry := 0
-  for retry <10 {
-      account := fw.GetAccountEthAddress(cfg.F5Contract.Owner)
-      if account == nil {
-         fmt.Println("Cannot find active account")
-         return nil, errors.New("Cannot find bugdet account")
-      }
-      if account.IsAvailable() {
-          auth := account.NewTransactor()
-          auth.GasLimit = 9000000
-          conn := fw.Client.GetConnection()
-          session,err := f5coin.NewBusiness(fw.ContractAddress,conn.Client)
-          if err != nil {
-              fmt.Println("Cannot find F5 contract")
-              return nil,err
-          }
-          conn.Mux.Lock()
-          defer  conn.Mux.Unlock()
-          tx,err :=  session.RegisterAccETH(auth,listAcc)
-          if(err == nil){
-            //Log transaction
-            redisCache.LogStart(tx.Hash().Hex(), 0, requestTime )
-            return tx, err
-          }
-      } else {
-          fmt.Println("Account: ",account.Address," is unavailable ")
-      }
-      retry = retry + 1
+  account := fw.GetAccountEthAddress(cfg.F5Contract.Owner)
+  if account == nil {
+     fmt.Println("Cannot find active account")
+     return nil, errors.New("Cannot find bugdet account")
   }
+  //if account.IsAvailable() {
+      auth := account.NewTransactor()
+      auth.GasLimit = 9000000
+      conn := fw.Client.GetConnection()
+      session,err := f5coin.NewBusiness(fw.ContractAddress,conn.Client)
+      if err != nil {
+          fmt.Println("Cannot find F5 contract")
+          return nil,err
+      }
+      conn.Mux.Lock()
+      defer  conn.Mux.Unlock()
+      tx,err :=  session.RegisterAccETH(auth,listAcc)
+      if(err == nil){
+        //Log transaction
+        redisCache.LogStart(tx.Hash().Hex(), 0, requestTime )
+        return tx, err
+      }
+  // } else {
+  //     fmt.Println("Account: ",account.Address," is unavailable ")
+  // }
   fmt.Println("End RegisterAccETH: retry failed ")
   return nil, errors.New("Cannot find wallet in pool to create transaction")
 }
