@@ -36,6 +36,10 @@ func (api *ApiFastV2) ProcessCall(c *routing.Context) error {
            fmt.Println("call create")
            api.create(c)
            return  nil
+			 case "list_wallet":
+            fmt.Println("call list_wallet")
+            api.list_wallet(c)
+            return  nil
        case "balance":
            fmt.Println("call balance")
            api.balance(c)
@@ -48,12 +52,12 @@ func (api *ApiFastV2) ProcessCall(c *routing.Context) error {
            fmt.Println("call set_state")
            api.set_state(c)
            return nil
-			 case "withdraw":
-           fmt.Println("call withdraw")
+			 case "debit":
+           fmt.Println("call debit")
            api.debit(c)
            return nil
-			 case "deposit":
-           fmt.Println("call deposit")
+			 case "credit":
+           fmt.Println("call credit")
            api.credit(c)
            return nil
 			 case "transfer":
@@ -97,6 +101,11 @@ func (api *ApiFastV2) ProcessCall(c *routing.Context) error {
    fmt.Fprintf(c, "URL not found ")
    return nil
  }
+ func (api *ApiFastV2) list_wallet(c *routing.Context){
+	  ret_list := api.walletHandler.StashNames()
+		fmt.Fprintf(c,strings.Join(ret_list, ","))
+ }
+
  func (api *ApiFastV2) summary(c *routing.Context){
 	  n_account, n_wallet, n_credit, n_debit, n_transfer := api.walletHandler.GetSummary()
 		ret_list := []string { "Number of registered Eth Accounts: " + strconv.Itoa(int(n_account)),

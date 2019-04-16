@@ -47,6 +47,41 @@ func NewF5WalletHandler(contract_address string, client *RpcRouting)  *F5WalletH
       // wallHandler.RegisterBatchEthToContract()
       return wallHandler
 }
+
+func  (fw *F5WalletHandler) StashNames() []string {
+  ret := []string{}
+
+  conn := fw.Client.GetConnection()
+  instance, err := f5coin.NewBusiness(fw.ContractAddress,conn.Client)
+
+  n_wallet, err := instance.GetStashNamesLenght(&bind.CallOpts{})
+  if err != nil {
+    fmt.Println("Cannot Get length of wallets, error: ",err)
+    return ret
+  }
+  i := int64(0)
+  for i < n_wallet.Int64() {
+      stash_name, err := instance.StashNames(&bind.CallOpts{},big.NewInt(i))
+      i = i + 1
+      if(err != nil) {
+         fmt.Println("Error get StashNames: ", err)
+         continue
+      }
+      bal, err := instance.GetBalance(&bind.CallOpts{},stash_name)
+      if(err != nil) {
+         fmt.Println("Error get balance of: ", string(stash_name[:]))
+         continue
+      }
+      state, err := instance.GetState(&bind.CallOpts{},stash_name)
+      if(err != nil) {
+         fmt.Println("Error get state of: ", string(stash_name[:]))
+         continue
+      }
+
+      ret = append(ret,string(stash_name[:]) + ":"+ bal.String() + ":" + strconv.Itoa(int(state)))
+  }
+  return ret
+}
 func (fw *F5WalletHandler) RegisterBatchEthToContract(requestTime int64) []string {
     ret := []string{}
     list := fw.GetAccountList()

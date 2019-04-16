@@ -64,7 +64,7 @@ func (rp *RedisPool) Process() {
                 if err != nil {
                     fmt.Println(err)
                 }
-                err = client.Set("transaction:" + tx.Id,string(value), 0).Err()
+                err = client.Set(tx.Id,string(value), 0).Err()
                 if err != nil {
                   fmt.Println(time.Now()," Write transaction to redis error: ", err)
                 }
@@ -73,7 +73,7 @@ func (rp *RedisPool) Process() {
               go func(){
                 fmt.Println("Get transation:",tx.Id, " from redis")
                 client := redisCache.getClient()
-                val, err2 := client.Get("transaction:" + tx.Id).Result()
+                val, err2 := client.Get(tx.Id).Result()
                 if err2 != nil {
                     fmt.Println(time.Now()," Cannot find transaction: ", tx.Id)
                     return
@@ -90,7 +90,7 @@ func (rp *RedisPool) Process() {
 
                 fmt.Println("Update transation:",tx.Id, " to redis")
                 value, err := json.Marshal(data)
-                err = client.Set("transaction:" + tx.Id,string(value), 0).Err()
+                err = client.Set(tx.Id,string(value), 0).Err()
                 if err != nil {
                   fmt.Println(time.Now()," Cannot update transaction: ",tx.Id,",Error:", err)
                 }
