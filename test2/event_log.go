@@ -55,23 +55,6 @@ func init(){
 
 }
 
-func WatchEventCreateStash() {
-	  fmt.Println("Watch Event CreateStash")
-		eventCh := make(chan *f5coin.BusinessEventCreateStash)
-		sub,err := instance.WatchEventCreateStash(&bind.WatchOpts{Start: nil,  Context: context.Background()},eventCh,nil)
-		if err != nil {
-				fmt.Println("Cannot create watch instance: ", err )
-				return
-		}
-		defer sub.Unsubscribe()
-		 for {
-				 select {
-							 case event := <-eventCh:
-									fmt.Println("time:",time.Now(),", WalletAddress: ", event.WalletAddress.Hex(),", Code: ", string(event.WalletCode[:]) )
-						}
-		 }
-}
-
 func WatchEventRegisterAccETH() {
 	  fmt.Println("Watch Event RegisterAccETH ")
 		eventCh := make(chan *f5coin.BusinessEventRegisterAccETH)
@@ -88,9 +71,96 @@ func WatchEventRegisterAccETH() {
 						}
 		 }
 }
+func WatchEventCreateStash() {
+	  fmt.Println("Watch Event CreateStash")
+		eventCh := make(chan *f5coin.BusinessEventCreateStash)
+		sub,err := instance.WatchEventCreateStash(&bind.WatchOpts{Start: nil,  Context: context.Background()},eventCh,nil)
+		if err != nil {
+				fmt.Println("Cannot create watch instance: ", err )
+				return
+		}
+		defer sub.Unsubscribe()
+		 for {
+				 select {
+							 case event := <-eventCh:
+									fmt.Println("time:",time.Now(),", WalletAddress: ", event.WalletAddress.Hex(),", Code: ", string(event.WalletCode[:]) )
+						}
+		 }
+}
+func WatchEventSetState() {
+	  fmt.Println("Watch Event CreateStash")
+		eventCh := make(chan *f5coin.BusinessEventSetState)
+		sub,err := instance.WatchEventSetState(&bind.WatchOpts{Start: nil,  Context: context.Background()},eventCh,nil)
+		if err != nil {
+				fmt.Println("Cannot create watch instance: ", err )
+				return
+		}
+		defer sub.Unsubscribe()
+		 for {
+				 select {
+							 case event := <-eventCh:
+									fmt.Println("time:",time.Now(),", Set State:  WalletCode: ", string(event.WalletCode[:]),", StashState: ", event.StashState)
+						}
+		 }
+}
+
+func WatchEventCredit() {
+	  fmt.Println("Watch Business Event Credit ")
+		eventCh := make(chan *f5coin.BusinessEventCredit)
+		sub,err := instance.WatchEventCredit(&bind.WatchOpts{Start: nil,  Context: context.Background()},eventCh,nil,nil)
+		if err != nil {
+				fmt.Println("Cannot create watch instance: ", err )
+				return
+		}
+		defer sub.Unsubscribe()
+		 for {
+				 select {
+							 case event := <-eventCh:
+									 fmt.Println("time:",time.Now(),", Credit TxRef: ",  string(event.TxRef[:]), ", WalletCode:",  string(event.WalletCode[:]), ", Amount: ",event.Amount )
+						}
+		 }
+}
+func WatchEventDebit() {
+	  fmt.Println("Watch Business Event Debit ")
+		eventCh := make(chan *f5coin.BusinessEventDebit)
+		sub,err := instance.WatchEventDebit(&bind.WatchOpts{Start: nil,  Context: context.Background()},eventCh,nil,nil)
+		if err != nil {
+				fmt.Println("Cannot create watch instance: ", err )
+				return
+		}
+		defer sub.Unsubscribe()
+		 for {
+				 select {
+							 case event := <-eventCh:
+								 fmt.Println("time:",time.Now(),", Debit TxRef: ",  string(event.TxRef[:]), ", WalletCode:", string(event.WalletCode[:]), ", Amount: ",event.Amount )
+						}
+		 }
+}
+func WatchEventTransfer() {
+	  fmt.Println("Watch Business Event Debit ")
+		eventCh := make(chan *f5coin.BusinessEventTransfer)
+		sub,err := instance.WatchEventTransfer(&bind.WatchOpts{Start: nil,  Context: context.Background()},eventCh,nil,nil,nil)
+		if err != nil {
+				fmt.Println("Cannot create watch instance: ", err )
+				return
+		}
+		defer sub.Unsubscribe()
+		 for {
+				 select {
+							 case event := <-eventCh:
+								 fmt.Println("time:",time.Now(),", Transfer TxRef: ",  string(event.TxRef[:]), ", Sender:", string(event.Sender[:]) , ", Receiver:",string(event.Receiver[:]), ", Amount: ",event.Amount , ", Note: ",event.Note , ", TxType: ",event.TxType )
+						}
+		 }
+}
 func main() {
 	  var wg sync.WaitGroup
-	  wg.Add(2)
+	  wg.Add(6)
+
+		go func() {
+			println("Loop Watch Even tRegisterAccETH ")
+			defer wg.Done()
+			 WatchEventRegisterAccETH()
+		 }()
 
 	 	go func() {
 			println("Loop Watch Event CreateStash ")
@@ -98,10 +168,25 @@ func main() {
 			WatchEventCreateStash()
 		}()
 		go func() {
-			println("Loop Watch Even tRegisterAccETH ")
+			println("Loop Watch Event SetState ")
 			defer wg.Done()
-			 WatchEventRegisterAccETH()
-		 }()
+			WatchEventSetState()
+		}()
+		go func() {
+			println("Loop Watch Event Credit ")
+			defer wg.Done()
+			WatchEventCredit()
+		}()
+		go func() {
+			println("Loop Watch Event Debit ")
+			defer wg.Done()
+			WatchEventDebit()
+		}()
+		go func() {
+			println("Loop Watch Event Transfer ")
+			defer wg.Done()
+			WatchEventTransfer()
+		}()
 		 wg.Wait()
 		 fmt.Println("Finished Event Listening")
 }
