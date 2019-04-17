@@ -10,6 +10,7 @@ import (
   // "encoding/json"
 	  "strconv"
 		"time"
+		 "encoding/json"
 )
 
 type ApiFastV2 struct {
@@ -36,10 +37,14 @@ func (api *ApiFastV2) ProcessCall(c *routing.Context) error {
            fmt.Println("call create")
            api.create(c)
            return  nil
-			 case "list_wallet":
+			 case "list":
             fmt.Println("call list_wallet")
-            api.list_wallet(c)
+            api.list(c)
             return  nil
+			case "history":
+	           fmt.Println("call history")
+	           api.history(c)
+	           return  nil
        case "balance":
            fmt.Println("call balance")
            api.balance(c)
@@ -101,9 +106,25 @@ func (api *ApiFastV2) ProcessCall(c *routing.Context) error {
    fmt.Fprintf(c, "URL not found ")
    return nil
  }
- func (api *ApiFastV2) list_wallet(c *routing.Context){
+ func (api *ApiFastV2) history(c *routing.Context){
+	 hist_type := c.Param("p1")
+	 records := []string{}
+	 switch hist_type {
+		 case "credit":
+		   records  = api.walletHandler.CreditHistory()
+		 case "debit":
+			 records  = api.walletHandler.DebitHistory()
+		 case "transfer":
+ 			records  = api.walletHandler.TransferHistory()
+	 }
+	 list_json, _ := json.Marshal(records)
+	 fmt.Fprintf(c,string(list_json))
+ }
+
+ func (api *ApiFastV2) list(c *routing.Context){
 	  ret_list := api.walletHandler.StashNames()
-		fmt.Fprintf(c,strings.Join(ret_list, ","))
+		list_json, _ := json.Marshal(ret_list)
+		fmt.Fprintf(c,string(list_json))
  }
 
  func (api *ApiFastV2) summary(c *routing.Context){
@@ -113,20 +134,22 @@ func (api *ApiFastV2) ProcessCall(c *routing.Context) error {
 			" Number of credit transactions: " + n_credit.String() ,
 			" Number of debit transactions: " +  n_debit.String() ,
 			"  Number of transfer transactions: " +  n_transfer.String()}
-		fmt.Fprintf(c,strings.Join(ret_list, ","))
+		list_json, _ := json.Marshal(ret_list)
+		fmt.Fprintf(c,string(list_json))
  }
 func (api *ApiFastV2)  autofill(c *routing.Context){
 			api.walletHandler.LoadAccountEth()
 			ret_list := api.walletHandler.AutoFillGas()
-			fmt.Fprintf(c,strings.Join(ret_list, ","))
+			list_json, _ := json.Marshal(ret_list)
+			fmt.Fprintf(c,string(list_json))
  }
 func (api *ApiFastV2)  registerAccounts(c *routing.Context){
 		 api.walletHandler.LoadAccountEth()
 		 api.walletHandler.AutoFillGas()
 		 requestTime := time.Now().UnixNano()
 		 list := api.walletHandler.RegisterBatchEthToContract(requestTime)
-		 list_string := strings.Join(list,",")
-		 fmt.Fprintf(c,list_string)
+		 list_json, _ := json.Marshal(list)
+		 fmt.Fprintf(c,string(list_json))
 }
  // call create wallet
  func (api *ApiFastV2)  create(c *routing.Context){

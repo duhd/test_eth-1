@@ -26,6 +26,7 @@ type RpcRouting struct {
   TxCh chan *TxTransaction
   mutex sync.Mutex
   Mode int
+  AccountNode map[string]*EthNode
 }
 
 var rpcrouting *RpcRouting
@@ -41,12 +42,14 @@ func NewRouting(cfg *Config)  *RpcRouting{
        nodes = append(nodes,node)
      }
      txCh := make(chan *TxTransaction,cfg.Channel.TransferQueue)
+     accountNode := make(map[string]*EthNode)
 
      rpcrouting =  &RpcRouting{
         Nodes: nodes,
         Current: -1,
         TxCh: txCh,
         Mode: mode,
+        AccountNode: accountNode,
      }
      return rpcrouting
 }
@@ -93,7 +96,45 @@ func (r *RpcRouting) DeactiveNode(name string)  {
       }
     }
 }
+func (r *RpcRouting) GetConnectionByAccount(addr string)  (*RpcConnection) {
+    r.mutex.Lock()
+    defer r.mutex.Unlock()
+    len := len(r.Nodes)
+    if len >0 {
+        node, ok := r.AccountNode[addr]
+        if !ok {
+            fmt.Println("Update map: Add account: ", addr)
+            r.Current = (r.Current + 1 ) % len
+            node = r.Nodes[r.Current]
+            r.AccountNode[addr] = node
+        }
+        return node.GetConnection()
+    }
+    return nil
+}
 func (r *RpcRouting) GetConnection() (*RpcConnection) {
+    r.mutex.Lock()
+    defer r.mutex.Unlock()
+
+    len := len(r.Nodes)
+    retry := 0
+    if len >0 {
+        for retry < len {
+          r.Current = (r.Current + 1 ) % len
+          node := r.Nodes[r.Current]
+          if node.Active {
+            fmt.Println("Get connection: ", r.Current, " Node: ", node.HttpUrl)
+             return node.GetConnection()
+          }
+          retry = retry + 1
+        }
+    } else {
+      fmt.Println("Not find node in list")
+    }
+    return nil
+}
+
+func (r *RpcRouting) GetConnectionFix() (*RpcConnection) {
     r.mutex.Lock()
     defer r.mutex.Unlock()
 
@@ -110,7 +151,6 @@ func (r *RpcRouting) GetConnection() (*RpcConnection) {
         }
         return nil
       } else {
-
         node := r.Nodes[r.Current]
         if node.Active {
            return node.GetConnection()
@@ -247,7 +287,7 @@ func (r *RpcRouting) PendingNonceAt(account common.Address) (uint64, error) {
         n, err := conn.Client.PendingNonceAt(context.Background(),account)
         if  err == nil {
           fmt.Println("Successfully get nonce from: ", conn.Name )
-          return n, err 
+          return n, err
         }
         err_msg := err.Error()
         if strings.Contains(err_msg, "connection refused") {

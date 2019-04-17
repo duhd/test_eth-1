@@ -51,7 +51,7 @@ contract:
   initialToken: 100000000000000
   masterkey1: bea868edea1c167aab5a0eef99496e2a690f3fae
   masterkey2: 0e18db9aeea79d71b4c91c8375f1ef7fd0aaa594
-  address: 0x7d583b2d4510F0C377D4DCC93653c74e8b558eFa
+  address: 0x74E0bE68Ac76115e18AB358333721E63B257A395
 f5contract:
   gasprice: "1000"
   gaslimit: 900000

@@ -16,7 +16,6 @@ import (
 
 type WorkerPool struct {
    TxCh chan *types.Header
-
    HttpUrl string
    Clients []*RpcConnection
    Current int

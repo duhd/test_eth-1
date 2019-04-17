@@ -19,6 +19,7 @@ import (
   "sync"
   "math"
   "strconv"
+  "bytes"
 )
 
 type F5WalletHandler struct {
@@ -34,6 +35,9 @@ func stringTo32Byte(data string) [32]byte {
 	copy(arr[:], data)
   return arr
 }
+func byte32ToString(data [32]byte) string {
+  return string(bytes.Trim(data[:], "\x00"))
+}
 
 func NewF5WalletHandler(contract_address string, client *RpcRouting)  *F5WalletHandler{
       contractAddress := common.HexToAddress(contract_address)
@@ -47,11 +51,119 @@ func NewF5WalletHandler(contract_address string, client *RpcRouting)  *F5WalletH
       // wallHandler.RegisterBatchEthToContract()
       return wallHandler
 }
+func  (fw *F5WalletHandler) CreditHistory() []string {
+  ret := []string{}
 
+  conn := fw.Client.GetConnection()
+  instance, err := f5coin.NewBusiness(fw.ContractAddress,conn.Client)
+
+  n_credit, err := instance.GetCreditHistoryLength(&bind.CallOpts{})
+  if err != nil {
+    fmt.Println("Cannot Get length of wallets, error: ",err)
+    return ret
+  }
+  i := int64(0)
+  for i < n_credit.Int64() {
+      creditId, err := instance.CreditIdx(&bind.CallOpts{},big.NewInt(i))
+      i = i + 1
+      if(err != nil) {
+         fmt.Println("Error get Debit Idx: ", err)
+         continue
+      }
+      creditTx, err := instance.Credits(&bind.CallOpts{},creditId)
+      if(err != nil) {
+         fmt.Println("Error get Debit Transactions: ", string(creditId[:])," Error: ", err)
+         continue
+      }
+      list := []string{
+        byte32ToString(creditTx.TxRef),
+        byte32ToString(creditTx.StashName),
+        creditTx.Amount.String(),
+        creditTx.Timestamp.String(),
+      }
+      credit_tx :=  strings.Join(list, ",")
+      ret = append(ret,credit_tx)
+  }
+  return ret
+}
+func  (fw *F5WalletHandler) DebitHistory() []string {
+  ret := []string{}
+
+  conn := fw.Client.GetConnection()
+  instance, err := f5coin.NewBusiness(fw.ContractAddress,conn.Client)
+
+  n_debit, err := instance.GetDebitHistoryLength(&bind.CallOpts{})
+  if err != nil {
+    fmt.Println("Cannot Get length of wallets, error: ",err)
+    return ret
+  }
+  i := int64(0)
+  for i < n_debit.Int64() {
+      debitId, err := instance.DebitIdx(&bind.CallOpts{},big.NewInt(i))
+      i = i + 1
+      if(err != nil) {
+         fmt.Println("Error get Debit Idx: ", err)
+         continue
+      }
+      debitTx, err := instance.Debits(&bind.CallOpts{},debitId)
+      if(err != nil) {
+         fmt.Println("Error get Debit Transactions: ", string(debitId[:])," Error: ", err)
+         continue
+      }
+      list := []string{
+        byte32ToString(debitTx.TxRef),
+        byte32ToString(debitTx.StashName),
+        debitTx.Amount.String(),
+        debitTx.Timestamp.String(),
+      }
+      debit_tx :=  strings.Join(list, ",")
+      ret = append(ret,debit_tx)
+  }
+  return ret
+}
+func  (fw *F5WalletHandler) TransferHistory() []string {
+  ret := []string{}
+
+  conn := fw.Client.GetConnection()
+  instance, err := f5coin.NewBusiness(fw.ContractAddress,conn.Client)
+
+  n_transfer, err := instance.GetTransferHistoryLength(&bind.CallOpts{})
+  if err != nil {
+    fmt.Println("Cannot Get length of wallets, error: ",err)
+    return ret
+  }
+  i := int64(0)
+  for i < n_transfer.Int64() {
+      transferId, err := instance.TransferIdx(&bind.CallOpts{},big.NewInt(i))
+      i = i + 1
+      if(err != nil) {
+         fmt.Println("Error get Debit Idx: ", err)
+         continue
+      }
+      transferTx, err := instance.Transfers(&bind.CallOpts{},transferId)
+      if(err != nil) {
+         fmt.Println("Error get Debit Transactions: ", string(transferId[:])," Error: ", err)
+         continue
+      }
+      list := []string{
+        byte32ToString(transferTx.TxRef),
+        byte32ToString(transferTx.Sender),
+        byte32ToString(transferTx.Receiver),
+        transferTx.Amount.String(),
+        transferTx.Note,
+        strconv.Itoa(int(transferTx.TxType)),
+        transferTx.Timestamp.String(),
+      }
+      transfer_tx :=  strings.Join(list, ",")
+      ret = append(ret,transfer_tx)
+  }
+  return ret
+}
 func  (fw *F5WalletHandler) StashNames() []string {
   ret := []string{}
 
   conn := fw.Client.GetConnection()
+
   instance, err := f5coin.NewBusiness(fw.ContractAddress,conn.Client)
 
   n_wallet, err := instance.GetStashNamesLenght(&bind.CallOpts{})
@@ -69,26 +181,31 @@ func  (fw *F5WalletHandler) StashNames() []string {
       }
       bal, err := instance.GetBalance(&bind.CallOpts{},stash_name)
       if(err != nil) {
-         fmt.Println("Error get balance of: ", string(stash_name[:]))
+         fmt.Println("Error get balance of: ", string(stash_name[:]), "Error:", err)
          continue
       }
       state, err := instance.GetState(&bind.CallOpts{},stash_name)
       if(err != nil) {
-         fmt.Println("Error get state of: ", string(stash_name[:]))
+         fmt.Println("Error get state of: ", string(stash_name[:]), "Error:", err)
          continue
       }
-
-      ret = append(ret,string(stash_name[:]) + ":"+ bal.String() + ":" + strconv.Itoa(int(state)))
+      list := []string{
+         byte32ToString(stash_name),
+         bal.String(),
+         strconv.Itoa(int(state)),
+      }
+      wallet_info := strings.Join(list,",")
+      ret = append(ret,wallet_info)
   }
   return ret
 }
 func (fw *F5WalletHandler) RegisterBatchEthToContract(requestTime int64) []string {
     ret := []string{}
     list := fw.GetAccountList()
-    j := 0
     sublist :=  []common.Address{}
-    for _,item := range list {
-      if j == 0 {
+    for i,item := range list {
+      sublist = append(sublist,item)
+      if i > 0 && i % 5 == 0 {
         if len(sublist) > 0 {
           fmt.Println("Start register sublist")
           tx,err := fw.RegisterAccETH(requestTime,sublist)
@@ -100,8 +217,15 @@ func (fw *F5WalletHandler) RegisterBatchEthToContract(requestTime int64) []strin
           sublist = []common.Address{}
         }
       }
-      sublist = append(sublist,item)
-      j = ( j + 1 ) % 5
+    }
+    if len(sublist) > 0 {
+      fmt.Println("Start register last sublist")
+      tx,err := fw.RegisterAccETH(requestTime,sublist)
+      if err != nil {
+         ret = append(ret, err.Error())
+      } 	else {
+         ret = append(ret, tx.Hash().Hex())
+      }
     }
     return ret
 }
@@ -257,7 +381,7 @@ func (fw *F5WalletHandler) CreateStash(requestTime int64, stashName string, type
     for retry <10 {
         account := fw.GetAccountEth()
         if account.IsAvailable() {
-          conn := fw.Client.GetConnection()
+          conn := fw.Client.GetConnectionByAccount(account.Address)
           session, err := f5coin.NewBusiness(fw.ContractAddress,conn.Client)
           if err != nil {
               fmt.Println("Cannot find F5 contract")
@@ -309,7 +433,7 @@ func (fw *F5WalletHandler) SetState(requestTime int64, stashName string, stashSt
       account := fw.GetAccountEth()
       if account.IsAvailable() {
           auth := account.NewTransactor()
-          conn := fw.Client.GetConnection()
+          conn := fw.Client.GetConnectionByAccount(account.Address)
           session, err  := f5coin.NewBusiness(fw.ContractAddress,conn.Client)
           if err != nil {
               fmt.Println("Cannot find F5 contract")
@@ -360,7 +484,7 @@ func (fw *F5WalletHandler) Debit(requestTime int64, txRef string, stashName stri
         account := fw.GetAccountEth()
         if account.IsAvailable() {
             auth := account.NewTransactor()
-            conn := fw.Client.GetConnection()
+            conn := fw.Client.GetConnectionByAccount(account.Address)
             session,err := f5coin.NewBusiness(fw.ContractAddress,conn.Client)
             if err != nil {
                 fmt.Println("Cannot find F5 contract")
@@ -396,7 +520,7 @@ func (fw *F5WalletHandler) Credit(requestTime int64, txRef string, stashName str
       account := fw.GetAccountEth()
       if account.IsAvailable() {
           auth := account.NewTransactor()
-          conn := fw.Client.GetConnection()
+          conn := fw.Client.GetConnectionByAccount(account.Address)
           session,err := f5coin.NewBusiness(fw.ContractAddress,conn.Client)
 
           if err != nil {
@@ -433,7 +557,7 @@ func (fw *F5WalletHandler) Transfer(requestTime int64, txRef string, sender stri
       account := fw.GetAccountEth()
       if account.IsAvailable() {
           auth := account.NewTransactor()
-          conn := fw.Client.GetConnection()
+          conn := fw.Client.GetConnectionByAccount(account.Address)
           session,err := f5coin.NewBusiness(fw.ContractAddress,conn.Client)
           if err != nil {
               fmt.Println("Cannot find F5 contract")
@@ -462,7 +586,7 @@ func (fw *F5WalletHandler) RegisterAccETH(requestTime int64, listAcc []common.Ad
   //if account.IsAvailable() {
       auth := account.NewTransactor()
       auth.GasLimit = 9000000
-      conn := fw.Client.GetConnection()
+      conn := fw.Client.GetConnectionByAccount(account.Address)
       session,err := f5coin.NewBusiness(fw.ContractAddress,conn.Client)
       if err != nil {
           fmt.Println("Cannot find F5 contract")
