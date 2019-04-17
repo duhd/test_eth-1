@@ -49,7 +49,7 @@ func init(){
 	gasPrice := new(big.Int)
 	gasPrice.SetString(cfg.F5Contract.GasPrice,10)
 	auth.GasPrice = gasPrice
-	auth.GasLimit = cfg.F5Contract.GasLimit
+	auth.GasLimit = cfg.F5Contract.GasLimitDefault
 
 	contractAddress := common.HexToAddress(cfg.F5Contract.Address)
 
@@ -60,6 +60,7 @@ func init(){
 	}
 }
 func RegisterEth(){
+
 		address := common.HexToAddress("0x" + cfg.F5Contract.Owner)
 		list := []common.Address{address,}
 		tx, err := instance.RegisterAccETH(auth,list)
@@ -68,7 +69,7 @@ func RegisterEth(){
 			return
 		}
 		fmt.Println("Register transaction: ",tx.Hash().Hex())
-		owner, err := instance.GetOwner(&bind.CallOpts{})
+		owner, err := instance.GetOwner(&bind.CallOpts{From: address})
 		if err != nil {
 			fmt.Println("Cannot Get Owner: ", cfg.F5Contract.Owner, ", error: ",err)
 			return
@@ -76,7 +77,7 @@ func RegisterEth(){
 		fmt.Println("Owner is: ",owner.Hex())
 		fmt.Println("Wait to get list of register accounts:.")
 		time.Sleep(2*time.Second)
-		n,err := instance.GetRegistedAccEthLength(&bind.CallOpts{})
+		n,err := instance.GetRegistedAccEthLength(&bind.CallOpts{From: address})
 		if err != nil {
 			fmt.Println("Cannot Get RegistedAccEthLength: ", cfg.F5Contract.Owner, ", error: ",err)
 			return
@@ -86,6 +87,7 @@ func RegisterEth(){
 
 }
 func CreateWallet(stashName string) {
+		address := common.HexToAddress("0x" + cfg.F5Contract.Owner)
 		tx, err := instance.CreateStash(auth,stringTo32Byte(stashName),int8(1))
 		if err != nil {
 			fmt.Println("Cannot create stash: ", stashName, ", error: ",err)
@@ -94,7 +96,7 @@ func CreateWallet(stashName string) {
 			fmt.Println("Register transaction: ",tx.Hash().Hex())
 			fmt.Println("Wait to get list of Wallets.")
 			time.Sleep(2*time.Second)
-   		n,err := instance.GetStashNamesLenght(&bind.CallOpts{})
+   		n,err := instance.GetStashNamesLenght(&bind.CallOpts{From: address})
 			if err != nil {
 				fmt.Println("Cannot Get Wallet Length: ", cfg.F5Contract.Owner, ", error: ",err)
 				return
@@ -102,6 +104,8 @@ func CreateWallet(stashName string) {
 			fmt.Println("Number of wallet: ",n)
 }
 func ActiveWallet(stashName string) {
+	 address := common.HexToAddress("0x" + cfg.F5Contract.Owner)
+
 		tx, err := instance.SetState(auth, stringTo32Byte(stashName),int8(1))
 		if err != nil {
 			fmt.Println("Cannot set state of stash: ", stashName, ", error: ",err)
@@ -111,7 +115,7 @@ func ActiveWallet(stashName string) {
 		fmt.Println("Sleep in 2 second")
 		time.Sleep(2*time.Second)
 
-		state, err := instance.GetState(&bind.CallOpts{},stringTo32Byte(stashName))
+		state, err := instance.GetState(&bind.CallOpts{From: address},stringTo32Byte(stashName))
 		if err != nil {
 			fmt.Println("Cannot get state of stash: ", stashName, ", error: ",err)
 			return
@@ -120,7 +124,9 @@ func ActiveWallet(stashName string) {
 }
 
 func Balance(stashName string) {
-	bal, err := instance.GetBalance(&bind.CallOpts{},stringTo32Byte(stashName))
+	address := common.HexToAddress("0x" + cfg.F5Contract.Owner)
+
+	bal, err := instance.GetBalance(&bind.CallOpts{From: address},stringTo32Byte(stashName))
 	if err != nil {
 		fmt.Println("Get balance of ", stashName, ", error: ",err)
 		return
@@ -129,6 +135,7 @@ func Balance(stashName string) {
 }
 
 func Deposit(stashName string, value int64) {
+
 	txRef := "tx01"
 	amount := big.NewInt(value)
 

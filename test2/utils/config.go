@@ -99,7 +99,8 @@ type Config struct {
 		} `yaml:"contract" json:"contract"`
     F5Contract struct {
         GasPrice string `yaml:"gasprice" json:"gasprice"`
-        GasLimit uint64 `yaml:"gaslimit" json:"gaslimit"`
+        GasLimitDefault uint64 `yaml:"gaslimitdefault" json:"gaslimitdefault"`
+        GasLimit map[string]uint64 `yaml:"gaslimit" json:"gaslimit"`
         EthBudget string `yaml:"ethBudget" json:"ethBudget"`
         Owner string `yaml:"owner" json:"owner"`
       	Address string `yaml:"address" json:"address"`

@@ -64,7 +64,7 @@ func  (w *WalletAccount) NewTransactor() *bind.TransactOpts {
      gasPrice := new(big.Int)
      gasPrice.SetString(cfg.F5Contract.GasPrice,10)
      auth.GasPrice = gasPrice
-     auth.GasLimit = cfg.F5Contract.GasLimit
+     auth.GasLimit = cfg.F5Contract.GasLimitDefault
      return auth
 }
 func (w *WalletAccount) PrepareTransferTransaction(nonce uint64, gLimit uint64, gPrice string, cAddress string,  from string,to string,amount string,append string)  (*types.Transaction, error)  {

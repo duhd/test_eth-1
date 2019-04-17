@@ -37,7 +37,13 @@ func main(){
 				if err != nil {
 					 log.Fatalf("Failed to create authorized transactor: %v", err)
 				}
+				gasLimit,ok := cfg.F5Contract.GasLimit["deploy"]
+				if !ok {
+					gasLimit = cfg.F5Contract.GasLimitDefault
+				}
 
+				fmt.Println("Set GasLimit: ", gasLimit)
+				auth.GasLimit = gasLimit
 				address, tx, _, err:= f5coin.DeployBusiness(auth,blockchain)
 
 				if err != nil {

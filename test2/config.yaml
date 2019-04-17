@@ -45,16 +45,24 @@ redis:
   password: ""
   db: 0
 contract:
-  gasprice: "1100"
+  gasprice: "1"
   gaslimit: 41000
   owner: ffbcd481c1330e180879b4d2b9b50642eea43c02
   initialToken: 100000000000000
   masterkey1: bea868edea1c167aab5a0eef99496e2a690f3fae
   masterkey2: 0e18db9aeea79d71b4c91c8375f1ef7fd0aaa594
-  address: 0x74E0bE68Ac76115e18AB358333721E63B257A395
+  address: 0xd07382Bc89F73b517EBF4e6ccf0a7738435428E7
 f5contract:
-  gasprice: "1000"
-  gaslimit: 900000
+  gasprice: "1"
+  gaslimitdefault: 9000000
+  gaslimit:
+    create: 900000
+    credit: 900000
+    debit: 900000
+    deploy: 9000000
+    register: 900000
+    state: 900000
+    tranfer: 900000
   ethBudget: ffbcd481c1330e180879b4d2b9b50642eea43c02
   owner: ffbcd481c1330e180879b4d2b9b50642eea43c02
-  address: 0x3Dd4908A02a042CE5ebdBD29bC21Fd680D9571f6
+  address: 0x91fdBCE399373724F5d71169FE39E87c72C83953
